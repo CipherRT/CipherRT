@@ -1,0 +1,385 @@
+{
+  "formatVersion": 1,
+  "exercises": [
+    {
+      "name": "Pull-ups",
+      "muscleGroup": "back",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Chin-ups",
+      "muscleGroup": "back",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Wide-grip lat pulldown",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Close-grip lat pulldown",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Machine lat pulldown",
+      "muscleGroup": "back",
+      "equipment": "machine"
+    },
+    {
+      "name": "Cable wide-grip row",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Seated cable row",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Single-arm row",
+      "muscleGroup": "back",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Barbell row",
+      "muscleGroup": "back",
+      "equipment": "barbell"
+    },
+    {
+      "name": "T-bar row",
+      "muscleGroup": "back",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Chest-supported row",
+      "muscleGroup": "back",
+      "equipment": "machine"
+    },
+    {
+      "name": "Deadlift",
+      "muscleGroup": "back",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Back extensions",
+      "muscleGroup": "back",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Straight-arm pulldown",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Face pull",
+      "muscleGroup": "back",
+      "equipment": "cable"
+    },
+    {
+      "name": "Barbell bench press",
+      "muscleGroup": "chest",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Incline barbell bench press",
+      "muscleGroup": "chest",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Dumbbell bench press",
+      "muscleGroup": "chest",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Incline dumbbell press",
+      "muscleGroup": "chest",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Machine chest press",
+      "muscleGroup": "chest",
+      "equipment": "machine"
+    },
+    {
+      "name": "Cable fly",
+      "muscleGroup": "chest",
+      "equipment": "cable"
+    },
+    {
+      "name": "Pec deck",
+      "muscleGroup": "chest",
+      "equipment": "machine"
+    },
+    {
+      "name": "Dips",
+      "muscleGroup": "chest",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Push-ups",
+      "muscleGroup": "chest",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Decline bench press",
+      "muscleGroup": "chest",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Shoulder warm-ups",
+      "muscleGroup": "shoulders",
+      "equipment": "band"
+    },
+    {
+      "name": "Reverse pec deck",
+      "muscleGroup": "shoulders",
+      "equipment": "machine"
+    },
+    {
+      "name": "Machine shoulder press",
+      "muscleGroup": "shoulders",
+      "equipment": "machine"
+    },
+    {
+      "name": "Overhead press",
+      "muscleGroup": "shoulders",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Seated dumbbell press",
+      "muscleGroup": "shoulders",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Lateral raise",
+      "muscleGroup": "shoulders",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Cable lateral raise",
+      "muscleGroup": "shoulders",
+      "equipment": "cable"
+    },
+    {
+      "name": "Front raise",
+      "muscleGroup": "shoulders",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Rear delt fly",
+      "muscleGroup": "shoulders",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Upright row",
+      "muscleGroup": "shoulders",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Shrugs",
+      "muscleGroup": "shoulders",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Barbell curl",
+      "muscleGroup": "biceps",
+      "equipment": "barbell"
+    },
+    {
+      "name": "EZ-bar curl",
+      "muscleGroup": "biceps",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Dumbbell curl",
+      "muscleGroup": "biceps",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Hammer curl",
+      "muscleGroup": "biceps",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Incline dumbbell curl",
+      "muscleGroup": "biceps",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Preacher curl",
+      "muscleGroup": "biceps",
+      "equipment": "machine"
+    },
+    {
+      "name": "Cable curl",
+      "muscleGroup": "biceps",
+      "equipment": "cable"
+    },
+    {
+      "name": "Concentration curl",
+      "muscleGroup": "biceps",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Tricep rope pushdown",
+      "muscleGroup": "triceps",
+      "equipment": "cable"
+    },
+    {
+      "name": "Tricep bar pushdown",
+      "muscleGroup": "triceps",
+      "equipment": "cable"
+    },
+    {
+      "name": "Overhead cable triceps extension",
+      "muscleGroup": "triceps",
+      "equipment": "cable"
+    },
+    {
+      "name": "Skull crushers",
+      "muscleGroup": "triceps",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Close-grip bench press",
+      "muscleGroup": "triceps",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Overhead dumbbell extension",
+      "muscleGroup": "triceps",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Bench dips",
+      "muscleGroup": "triceps",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Single-arm cable extension",
+      "muscleGroup": "triceps",
+      "equipment": "cable"
+    },
+    {
+      "name": "Back squat",
+      "muscleGroup": "legs",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Front squat",
+      "muscleGroup": "legs",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Leg press",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Hack squat",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Romanian deadlift",
+      "muscleGroup": "legs",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Bulgarian split squat",
+      "muscleGroup": "legs",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Walking lunges",
+      "muscleGroup": "legs",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Leg extension",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Lying leg curl",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Seated leg curl",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Hip thrust",
+      "muscleGroup": "legs",
+      "equipment": "barbell"
+    },
+    {
+      "name": "Standing calf raise",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Seated calf raise",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Goblet squat",
+      "muscleGroup": "legs",
+      "equipment": "dumbbell"
+    },
+    {
+      "name": "Hip abductor",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Hip adductor",
+      "muscleGroup": "legs",
+      "equipment": "machine"
+    },
+    {
+      "name": "Plank",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Hanging leg raise",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Cable crunch",
+      "muscleGroup": "core",
+      "equipment": "cable"
+    },
+    {
+      "name": "Ab wheel rollout",
+      "muscleGroup": "core",
+      "equipment": "other"
+    },
+    {
+      "name": "Russian twist",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Crunches",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Side plank",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    },
+    {
+      "name": "Dead bug",
+      "muscleGroup": "core",
+      "equipment": "bodyweight"
+    }
+  ]
+}
