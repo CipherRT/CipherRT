@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.Flag
+import androidx.compose.material.icons.rounded.MonitorHeart
 import androidx.compose.material.icons.rounded.Height
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.Straighten
@@ -147,7 +148,19 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
                 }
             }
             item {
-                GroupedSection(header = "Workout", footer = "Used for new exercises you add. Each exercise can have its own rest time.") {
+                GroupedSection(
+                    header = "Workout",
+                    footer = "Your streak grows each Monday–Sunday week you hit the target. Default rest is used for new exercises.",
+                ) {
+                    ListRow("Weekly target", icon = Icons.Rounded.Flag, iconColor = AppTheme.colors.accent, trailing = {
+                        Stepper(p.weeklyTarget, { vm.update(p.copy(weeklyTarget = it)) }, 1..7, format = { "$it / week" })
+                    })
+                    RowDivider(startIndent = 60.dp)
+                    com.gymplanner.app.core.ui.SwitchRow(
+                        "Cardio counts toward target", p.cardioCountsTowardTarget, { vm.update(p.copy(cardioCountsTowardTarget = it)) },
+                        icon = Icons.Rounded.MonitorHeart,
+                    )
+                    RowDivider(startIndent = 60.dp)
                     ListRow("Default rest", icon = Icons.Rounded.Timer, iconColor = AppTheme.colors.indigo, trailing = {
                         Stepper(rest, vm.c.prefs::setDefaultRest, 15..600, step = 15, format = Dates::rest)
                     })

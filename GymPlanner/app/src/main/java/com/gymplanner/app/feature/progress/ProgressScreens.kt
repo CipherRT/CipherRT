@@ -1,6 +1,45 @@
 package com.gymplanner.app.feature.progress
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
+import com.gymplanner.app.core.data.displayName
+import com.gymplanner.app.core.ui.ScreenPadding
+import com.gymplanner.app.core.ui.SheetHeader
+import com.gymplanner.app.feature.today.Legend
+import com.gymplanner.app.feature.today.Streak
+import com.gymplanner.app.feature.weight.signed
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,36 +76,57 @@ import com.gymplanner.app.feature.settings.ProfileMenuButton
 fun ProgressScreen(menu: ProfileMenuTargets, onOpenExercise: (Long) -> Unit) {
     val vm = appViewModel { ProgressViewModel(it) }
     val s by vm.state.collectAsStateWithLifecycle()
+    var dayDetail by remember { mutableStateOf<LocalDate?>(null) }
 
-    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { LargeTitle("Progress") { ProfileMenuButton(menu) } }
+        item { StreakCard(s.streak, s.profile?.weeklyTarget ?: 4) }
         item {
-            Column {
-                Text(
-                    "THIS WEEK", style = AppTheme.type.sectionHeader, color = AppTheme.colors.secondaryLabel,
-                    modifier = Modifier.padding(start = 32.dp, bottom = 6.dp),
+            Card {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButtonSmall(Icons.AutoMirrored.Rounded.KeyboardArrowLeft, "Previous month") { vm.shiftMonth(-1) }
+                    Text(
+                        s.month.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())),
+                        style = AppTheme.type.subhead.copy(fontWeight = FontWeight.SemiBold), color = AppTheme.colors.label,
+                        textAlign = TextAlign.Center, modifier = Modifier.weight(1f),
+                    )
+                    val canNext = s.month.isBefore(YearMonth.now())
+                    IconButtonSmall(Icons.AutoMirrored.Rounded.KeyboardArrowRight, "Next month", enabled = canNext) { vm.shiftMonth(1) }
+                }
+                Spacer(Modifier.height(8.dp))
+                MonthCalendar(s.month, s.gymDays, s.cardioDays) { dayDetail = it }
+                Spacer(Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Legend()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(10.dp).border(2.dp, AppTheme.colors.label, RoundedCornerShape(3.dp)))
+                        Text("  Today", style = AppTheme.type.caption, color = AppTheme.colors.secondaryLabel)
+                    }
+                }
+            }
+        }
+        item {
+            Row(Modifier.padding(horizontal = ScreenPadding.dp + 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile("gym sessions", "${s.stats.gymSessions}", Modifier.weight(1f))
+                StatTile("cardio", "${s.stats.cardioSessions}", Modifier.weight(1f))
+                StatTile(
+                    "${s.units.weightUnit} this month",
+                    s.stats.weightChangeKg?.let { signed(it, s.units, withUnit = false) } ?: "—",
+                    Modifier.weight(1f),
                 )
-                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatTile("Workouts", "${s.week.sessions}", Modifier.weight(1f))
-                    StatTile("Sets", "${s.week.sets}", Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(10.dp))
-                Row(Modifier.padding(horizontal = 16.dp)) {
-                    StatTile("Volume (weight × reps)", Units.formatVolume(s.week.volumeKg, s.units), Modifier.weight(1f))
-                }
             }
         }
         if (s.loaded && s.exercises.isEmpty()) {
             item {
                 EmptyState(
                     Icons.Rounded.BarChart, "No workouts yet",
-                    "Finish your first workout and your progress for each exercise shows up here.",
+                    "Finish your first workout and each exercise gets its own chart here.",
                 )
             }
         }
         if (s.exercises.isNotEmpty()) {
             item {
-                GroupedSection(header = "Exercises", footer = "Tap an exercise to see its chart and past sessions.") {
+                GroupedSection(header = "Exercises", footer = "Tap an exercise for its chart and past sessions.") {
                     s.exercises.forEachIndexed { i, e ->
                         ListRow(
                             e.name,
@@ -78,21 +138,153 @@ fun ProgressScreen(menu: ProfileMenuTargets, onOpenExercise: (Long) -> Unit) {
                 }
             }
         }
-        if (s.recent.isNotEmpty()) {
-            item {
-                GroupedSection(header = "Recent workouts") {
-                    s.recent.forEachIndexed { i, w ->
+        item { Spacer(Modifier.height(24.dp)) }
+    }
+
+    dayDetail?.let { d -> DayDetailSheet(d, s, onDismiss = { dayDetail = null }) }
+}
+
+@Composable
+private fun StreakCard(streak: Streak, target: Int) {
+    Card {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(
+                Modifier.size(64.dp).clip(RoundedCornerShape(20.dp)).background(AppTheme.colors.accent),
+                contentAlignment = Alignment.Center,
+            ) { Icon(Icons.Rounded.LocalFireDepartment, null, tint = AppTheme.colors.onAccent, modifier = Modifier.size(34.dp)) }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    "${streak.current} week${if (streak.current == 1) "" else "s"}",
+                    style = AppTheme.type.number.copy(fontSize = 30.sp), color = AppTheme.colors.label,
+                )
+                Text("Streak · best ${streak.best} week${if (streak.best == 1) "" else "s"}", style = AppTheme.type.footnote, color = AppTheme.colors.secondaryLabel)
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text("${streak.thisWeek}", style = AppTheme.type.number.copy(fontSize = 20.sp), color = AppTheme.colors.label)
+                    Text("/$target", style = AppTheme.type.subhead, color = AppTheme.colors.secondaryLabel)
+                }
+                Text("this week", style = AppTheme.type.caption, color = AppTheme.colors.secondaryLabel)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IconButtonSmall(icon: androidx.compose.ui.graphics.vector.ImageVector, description: String, enabled: Boolean = true, onClick: () -> Unit) {
+    Box(
+        Modifier.size(44.dp).clip(CircleShape).clickable(enabled = enabled, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { Icon(icon, description, tint = if (enabled) AppTheme.colors.label else AppTheme.colors.tertiaryLabel) }
+}
+
+/** Month grid, Monday first. Gym days filled with the accent, cardio days a blue ring, today outlined. */
+@Composable
+private fun MonthCalendar(month: YearMonth, gym: Set<LocalDate>, cardio: Set<LocalDate>, onDay: (LocalDate) -> Unit) {
+    val first = month.atDay(1)
+    val lead = first.dayOfWeek.value - 1
+    val cells = List(lead) { null } + (1..month.lengthOfMonth()).map { month.atDay(it) }
+    val today = LocalDate.now()
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row {
+            DayOfWeek.entries.forEach {
+                Text(
+                    it.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                    style = AppTheme.type.caption.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+                    color = AppTheme.colors.secondaryLabel, textAlign = TextAlign.Center, modifier = Modifier.weight(1f),
+                )
+            }
+        }
+        cells.chunked(7).forEach { week ->
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                week.forEach { d ->
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        if (d != null) {
+                            val g = d in gym; val c = d in cardio
+                            CalendarDay(d.dayOfMonth, g, c, d == today, d.isAfter(today)) { onDay(d) }
+                        }
+                    }
+                }
+                repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarDay(n: Int, gym: Boolean, cardio: Boolean, today: Boolean, future: Boolean, onClick: () -> Unit) {
+    val c = AppTheme.colors
+    val shape = if (cardio && !gym) CircleShape else RoundedCornerShape(10.dp)
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .height(38.dp)
+            .clip(shape)
+            .background(if (gym) c.accent else androidx.compose.ui.graphics.Color.Transparent)
+            .then(
+                when {
+                    gym && cardio -> Modifier.border(3.dp, c.cardio, shape)
+                    cardio -> Modifier.border(2.dp, c.cardio, shape)
+                    today -> Modifier.border(2.dp, c.label, shape)
+                    else -> Modifier
+                }
+            )
+            .clickable(enabled = !future, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = "$n" + when { gym && cardio -> ", gym and cardio"; gym -> ", gym"; cardio -> ", cardio"; else -> "" } + if (today) ", today" else ""
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            "$n",
+            style = AppTheme.type.footnote.copy(fontWeight = FontWeight.SemiBold),
+            color = when { gym -> c.onAccent; cardio -> c.cardio; future -> c.tertiaryLabel; else -> c.chipText },
+        )
+    }
+}
+
+/** What happened on one day: workouts, cardio, weight. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DayDetailSheet(day: LocalDate, s: ProgressUiState, onDismiss: () -> Unit) {
+    val workouts = s.sessions.filter { Dates.toLocalDate(it.startedAt) == day }
+    val cardio = s.cardio.filter { it.date == day.toEpochDay() }
+    val weight = s.weights.firstOrNull { it.date == day.toEpochDay() }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = AppTheme.colors.background,
+        dragHandle = null,
+    ) {
+        Column(Modifier.navigationBarsPadding().padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            SheetHeader(Dates.relative(day.toEpochDay()), onCancel = null, doneText = "Done", onDone = onDismiss)
+            if (workouts.isEmpty() && cardio.isEmpty() && weight == null) {
+                Text("Nothing logged on this day.", style = AppTheme.type.subhead, color = AppTheme.colors.secondaryLabel, modifier = Modifier.padding(horizontal = 24.dp))
+            }
+            if (workouts.isNotEmpty()) {
+                GroupedSection(header = "Gym") {
+                    workouts.forEachIndexed { i, w ->
                         ListRow(
                             w.dayName + if (w.isLight) " (light)" else "",
+                            subtitle = Dates.time(w.startedAt),
                             value = w.finishedAt?.let { Dates.durationWords(it - w.startedAt) },
-                            subtitle = Dates.relativeMillis(w.startedAt) + " · " + Dates.time(w.startedAt),
                         )
-                        if (i < s.recent.lastIndex) RowDivider()
+                        if (i < workouts.lastIndex) RowDivider()
                     }
                 }
             }
+            if (cardio.isNotEmpty()) {
+                GroupedSection(header = "Cardio") {
+                    cardio.forEachIndexed { i, c ->
+                        ListRow(c.displayName(), subtitle = "${c.minutes} min", value = "${c.kcal} kcal")
+                        if (i < cardio.lastIndex) RowDivider()
+                    }
+                }
+            }
+            weight?.let { w ->
+                GroupedSection(header = "Weight") { ListRow("Body weight", value = Units.formatWeight(w.weightKg, s.units)) }
+            }
         }
-        item { Spacer(Modifier.height(24.dp)) }
     }
 }
 
