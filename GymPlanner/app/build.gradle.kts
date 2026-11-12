@@ -23,8 +23,9 @@ android {
         applicationId = "com.gymplanner.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        // v2 must install over v1: same applicationId, same signing key, higher versionCode.
+        versionCode = 2
+        versionName = "2.0"
     }
 
     signingConfigs {
@@ -53,6 +54,23 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    testOptions {
+        // Robolectric runs Room's MigrationTestHelper on the JVM, reading the exported schemas.
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric downloads its Android runtime from Maven Central; a machine that
+            // can't reach it can set robolectricRepo=<mirror> in ~/.gradle/gradle.properties.
+            it.systemProperty(
+                "robolectric.dependency.repo.url",
+                providers.gradleProperty("robolectricRepo").getOrElse("https://repo1.maven.org/maven2"),
+            )
+        }
+    }
+    sourceSets {
+        // MigrationTest (Robolectric) reads Room's exported schemas from the debug assets.
+        // Release builds don't include them.
+        getByName("debug").assets.srcDir("$projectDir/schemas")
     }
 }
 
@@ -89,4 +107,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
+    testImplementation(libs.room.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.junit)
 }

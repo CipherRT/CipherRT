@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -66,6 +67,11 @@ interface ExerciseDao {
 
     @Query("SELECT COUNT(*) FROM exercise WHERE isCustom = 0")
     suspend fun builtInCount(): Int
+
+    @Query("SELECT * FROM exercise WHERE isCustom = 0")
+    suspend fun builtIns(): List<Exercise>
+
+    @Update suspend fun update(exercise: Exercise)
 
     @Insert suspend fun insert(exercise: Exercise): Long
     @Insert suspend fun insertAll(exercises: List<Exercise>)
@@ -265,4 +271,46 @@ interface WorkoutDao {
         sets(sessionId).forEach { deleteSet(it) }
         insertSets(sets)
     }
+}
+
+@Dao
+interface TrackDao {
+    // Cardio
+    @Query("SELECT * FROM cardio_session WHERE profileId = :profileId ORDER BY date DESC, createdAt DESC")
+    fun observeCardio(profileId: Long): Flow<List<CardioSession>>
+
+    @Query("SELECT * FROM cardio_session WHERE profileId = :profileId AND date >= :fromDay ORDER BY date")
+    fun observeCardioSince(profileId: Long, fromDay: Long): Flow<List<CardioSession>>
+
+    @Query("SELECT * FROM cardio_session WHERE profileId = :profileId ORDER BY date")
+    suspend fun allCardio(profileId: Long): List<CardioSession>
+
+    @Insert suspend fun insertCardio(c: CardioSession): Long
+    @Insert suspend fun insertCardio(list: List<CardioSession>)
+    @Update suspend fun updateCardio(c: CardioSession)
+    @Delete suspend fun deleteCardio(c: CardioSession)
+
+    // Body measurements
+    @Query("SELECT * FROM body_measurement WHERE profileId = :profileId ORDER BY date DESC, id DESC")
+    fun observeMeasurements(profileId: Long): Flow<List<BodyMeasurement>>
+
+    @Query("SELECT * FROM body_measurement WHERE profileId = :profileId ORDER BY date")
+    suspend fun allMeasurements(profileId: Long): List<BodyMeasurement>
+
+    @Insert suspend fun insertMeasurement(m: BodyMeasurement): Long
+    @Insert suspend fun insertMeasurements(list: List<BodyMeasurement>)
+    @Update suspend fun updateMeasurement(m: BodyMeasurement)
+    @Delete suspend fun deleteMeasurement(m: BodyMeasurement)
+}
+
+@Dao
+interface GuideDao {
+    @Query("SELECT * FROM exercise_guide WHERE exerciseId = :exerciseId")
+    fun observe(exerciseId: Long): Flow<ExerciseGuide?>
+
+    @Query("SELECT * FROM exercise_guide WHERE exerciseId = :exerciseId")
+    suspend fun get(exerciseId: Long): ExerciseGuide?
+
+    @Upsert suspend fun upsert(guide: ExerciseGuide)
+    @Upsert suspend fun upsertAll(guides: List<ExerciseGuide>)
 }
