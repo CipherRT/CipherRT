@@ -95,6 +95,7 @@ fun NumberPadSheet(
         sheetState = sheetState,
         containerColor = AppTheme.colors.card,
         dragHandle = null,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
     ) {
         Column(Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp)) {
             SheetHeader(title = title, onCancel = onDismiss)
@@ -108,8 +109,8 @@ fun NumberPadSheet(
                 Row(Modifier.weight(1f), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.Bottom) {
                     Text(
                         text.ifEmpty { "0" },
-                        style = AppTheme.type.bigNumber.copy(fontSize = 56.sp),
-                        color = if (text.isEmpty() || fresh) AppTheme.colors.secondaryLabel else AppTheme.colors.label,
+                        style = AppTheme.type.bigNumber.copy(fontSize = 60.sp),
+                        color = if (text.isEmpty() || fresh) AppTheme.colors.secondaryLabel else AppTheme.colors.accent,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.semantics { contentDescription = "$text $unit" },
                     )
@@ -136,8 +137,8 @@ fun NumberPadSheet(
                             Box(
                                 Modifier
                                     .weight(1f)
-                                    .height(58.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .height(60.dp)
+                                    .clip(RoundedCornerShape(16.dp))
                                     .background(if (key.isEmpty()) AppTheme.colors.card else AppTheme.colors.cardElevated)
                                     .clickable(enabled = key.isNotEmpty(), role = Role.Button) { press(key) }
                                     .semantics { contentDescription = if (key == "⌫") "Delete" else key },
@@ -146,7 +147,7 @@ fun NumberPadSheet(
                                 if (key == "⌫") {
                                     Icon(Icons.AutoMirrored.Rounded.Backspace, null, tint = AppTheme.colors.label)
                                 } else {
-                                    Text(key, style = AppTheme.type.title1.copy(fontWeight = FontWeight.Normal), color = AppTheme.colors.label)
+                                    Text(key, style = AppTheme.type.title1.copy(fontWeight = FontWeight.SemiBold, fontSize = 26.sp), color = AppTheme.colors.label)
                                 }
                             }
                         }

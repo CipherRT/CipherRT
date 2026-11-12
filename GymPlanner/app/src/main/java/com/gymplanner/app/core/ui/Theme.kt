@@ -1,103 +1,110 @@
 package com.gymplanner.app.core.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.gymplanner.app.core.data.ThemeMode
+import com.gymplanner.app.R
+
+/** The accent colours a person can pick in Settings. Lime is the default. */
+enum class Accent(val label: String, val color: Color) {
+    LIME("Lime", Color(0xFFC6FF3D)),
+    ORANGE("Orange", Color(0xFFFF6B2C)),
+    CYAN("Cyan", Color(0xFF3DD9FF)),
+    PURPLE("Purple", Color(0xFFB18CFF));
+
+    companion object {
+        fun from(name: String?) = entries.firstOrNull { it.name == name } ?: LIME
+    }
+}
 
 /**
- * A calm, iOS-inspired palette: grouped grey backgrounds, white/charcoal cards,
- * one blue accent, and system green/red/orange for meaning.
+ * Dark design tokens from the v2 mockups. The single [accent] is only used for
+ * primary buttons, completed sets, the active tab, the streak and PRs.
  */
 @Immutable
 data class AppColors(
-    val isDark: Boolean,
-    val background: Color,      // grouped background behind cards
-    val card: Color,            // cards / list sections
-    val cardElevated: Color,    // fields inside cards, sheets
-    val separator: Color,
-    val label: Color,
-    val secondaryLabel: Color,
-    val tertiaryLabel: Color,
     val accent: Color,
-    val green: Color,
-    val red: Color,
-    val orange: Color,
-    val purple: Color,
-    val teal: Color,
-    val indigo: Color,
-    val pink: Color,
-    val fill: Color,            // subtle fill for keys, chips, segmented control
+    val onAccent: Color = Color(0xFF0E0F11),
+    val background: Color = Color(0xFF0E0F11),
+    val card: Color = Color(0xFF1A1C20),
+    val border: Color = Color(0xFF2C2F35),
+    /** Raised / active row. */
+    val cardElevated: Color = Color(0xFF22252A),
+    val bottomBar: Color = Color(0xFF141518),
+    val separator: Color = Color(0xFF24272C),
+    val label: Color = Color(0xFFF4F5F6),
+    val secondaryLabel: Color = Color(0xFFA1A7B0),
+    val tertiaryLabel: Color = Color(0xFF6B7079),
+    /** Neutral chip / icon tile background and its text. */
+    val chip: Color = Color(0xFF24272C),
+    val chipText: Color = Color(0xFFD3D7DD),
+    /** −/+ buttons, unselected keys, outlines of empty ticks. */
+    val fill: Color = Color(0xFF2C2F35),
+    val outline: Color = Color(0xFF3A3E45),
+    val cardio: Color = Color(0xFF6FC3FF),
+    /** Drop sets and warnings. */
+    val warning: Color = Color(0xFFFFB86B),
+    val warningCard: Color = Color(0xFF1F1A14),
+    val warningBorder: Color = Color(0xFF3A2E1F),
+    val red: Color = Color(0xFFFF6B6B),
+) {
+    val isDark: Boolean get() = true
+    // Older names kept so every screen reads one palette.
+    val green: Color get() = accent
+    val orange: Color get() = warning
+    val purple: Color get() = chipText
+    val teal: Color get() = chipText
+    val indigo: Color get() = chipText
+    val pink: Color get() = chipText
+}
+
+@OptIn(ExperimentalTextApi::class)
+val InterFamily = FontFamily(
+    Font(R.font.inter_variable, FontWeight.Normal, variationSettings = FontVariation.Settings(FontVariation.weight(400))),
+    Font(R.font.inter_variable, FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
+    Font(R.font.inter_variable, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.inter_variable, FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
 )
 
-val LightAppColors = AppColors(
-    isDark = false,
-    background = Color(0xFFF2F2F7),
-    card = Color(0xFFFFFFFF),
-    cardElevated = Color(0xFFF2F2F7),
-    separator = Color(0xFFD1D1D6),
-    label = Color(0xFF000000),
-    secondaryLabel = Color(0xFF6C6C70),
-    tertiaryLabel = Color(0xFFAEAEB2),
-    accent = Color(0xFF007AFF),
-    green = Color(0xFF34C759),
-    red = Color(0xFFFF3B30),
-    orange = Color(0xFFFF9500),
-    purple = Color(0xFFAF52DE),
-    teal = Color(0xFF30B0C7),
-    indigo = Color(0xFF5856D6),
-    pink = Color(0xFFFF2D55),
-    fill = Color(0x1F787880),
+@OptIn(ExperimentalTextApi::class)
+val GroteskFamily = FontFamily(
+    Font(R.font.space_grotesk_variable, FontWeight.Medium, variationSettings = FontVariation.Settings(FontVariation.weight(500))),
+    Font(R.font.space_grotesk_variable, FontWeight.SemiBold, variationSettings = FontVariation.Settings(FontVariation.weight(600))),
+    Font(R.font.space_grotesk_variable, FontWeight.Bold, variationSettings = FontVariation.Settings(FontVariation.weight(700))),
 )
 
-val DarkAppColors = AppColors(
-    isDark = true,
-    background = Color(0xFF000000),
-    card = Color(0xFF1C1C1E),
-    cardElevated = Color(0xFF2C2C2E),
-    separator = Color(0xFF38383A),
-    label = Color(0xFFFFFFFF),
-    secondaryLabel = Color(0xFF98989F),
-    tertiaryLabel = Color(0xFF5A5A5E),
-    accent = Color(0xFF0A84FF),
-    green = Color(0xFF30D158),
-    red = Color(0xFFFF453A),
-    orange = Color(0xFFFF9F0A),
-    purple = Color(0xFFBF5AF2),
-    teal = Color(0xFF40C8E0),
-    indigo = Color(0xFF5E5CE6),
-    pink = Color(0xFFFF375F),
-    fill = Color(0x3D787880),
-)
-
-/** Text styles that follow Apple's type ramp (sizes in sp, so they scale with the system font size). */
+/** Space Grotesk for headings and big numbers, Inter for everything else. Sizes in sp. */
 @Immutable
 data class AppType(
-    val largeTitle: TextStyle = TextStyle(fontSize = 34.sp, lineHeight = 41.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp),
-    val title1: TextStyle = TextStyle(fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
-    val title2: TextStyle = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
-    val title3: TextStyle = TextStyle(fontSize = 20.sp, lineHeight = 25.sp, fontWeight = FontWeight.SemiBold),
-    val headline: TextStyle = TextStyle(fontSize = 17.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
-    val body: TextStyle = TextStyle(fontSize = 17.sp, lineHeight = 22.sp),
-    val callout: TextStyle = TextStyle(fontSize = 16.sp, lineHeight = 21.sp),
-    val subhead: TextStyle = TextStyle(fontSize = 15.sp, lineHeight = 20.sp),
-    val footnote: TextStyle = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
-    val caption: TextStyle = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
-    val sectionHeader: TextStyle = TextStyle(fontSize = 13.sp, lineHeight = 18.sp, letterSpacing = 0.4.sp),
-    val bigNumber: TextStyle = TextStyle(fontSize = 44.sp, lineHeight = 50.sp, fontWeight = FontWeight.Bold),
+    val largeTitle: TextStyle = TextStyle(fontFamily = GroteskFamily, fontSize = 40.sp, lineHeight = 42.sp, fontWeight = FontWeight.Bold),
+    val title1: TextStyle = TextStyle(fontFamily = GroteskFamily, fontSize = 28.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold),
+    val title2: TextStyle = TextStyle(fontFamily = GroteskFamily, fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold),
+    val title3: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold),
+    val headline: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 16.sp, lineHeight = 21.sp, fontWeight = FontWeight.SemiBold),
+    val body: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 16.sp, lineHeight = 22.sp),
+    val callout: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 15.sp, lineHeight = 20.sp),
+    val subhead: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 14.sp, lineHeight = 19.sp),
+    val footnote: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 13.sp, lineHeight = 18.sp),
+    val caption: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 12.sp, lineHeight = 16.sp),
+    val sectionHeader: TextStyle = TextStyle(fontFamily = InterFamily, fontSize = 12.sp, lineHeight = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.08.em),
+    val number: TextStyle = TextStyle(fontFamily = GroteskFamily, fontSize = 22.sp, lineHeight = 26.sp, fontWeight = FontWeight.Bold),
+    val bigNumber: TextStyle = TextStyle(fontFamily = GroteskFamily, fontSize = 44.sp, lineHeight = 48.sp, fontWeight = FontWeight.Bold),
 )
 
-val LocalAppColors = staticCompositionLocalOf { DarkAppColors }
+val LocalAppColors = staticCompositionLocalOf { AppColors(accent = Accent.LIME.color) }
 val LocalAppType = staticCompositionLocalOf { AppType() }
 
 object AppTheme {
@@ -105,34 +112,20 @@ object AppTheme {
     val type: AppType @Composable get() = LocalAppType.current
 }
 
+/** Dark only (a light theme can come later). */
 @Composable
-fun GymTheme(mode: ThemeMode, content: @Composable () -> Unit) {
-    val dark = when (mode) {
-        ThemeMode.DARK -> true
-        ThemeMode.LIGHT -> false
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-    }
-    val c = if (dark) DarkAppColors else LightAppColors
-    // Material components (switches, sheets, dialogs, text fields) pick up the same palette.
-    val scheme = if (dark) {
-        darkColorScheme(
-            primary = c.accent, onPrimary = Color.White, secondary = c.accent,
-            background = c.background, onBackground = c.label,
-            surface = c.card, onSurface = c.label, surfaceVariant = c.cardElevated, onSurfaceVariant = c.secondaryLabel,
-            surfaceContainer = c.card, surfaceContainerHigh = c.card, surfaceContainerHighest = c.cardElevated,
-            surfaceContainerLow = c.card, surfaceContainerLowest = c.background,
-            outline = c.separator, outlineVariant = c.separator, error = c.red,
-        )
-    } else {
-        lightColorScheme(
-            primary = c.accent, onPrimary = Color.White, secondary = c.accent,
-            background = c.background, onBackground = c.label,
-            surface = c.card, onSurface = c.label, surfaceVariant = c.cardElevated, onSurfaceVariant = c.secondaryLabel,
-            surfaceContainer = c.card, surfaceContainerHigh = c.card, surfaceContainerHighest = c.cardElevated,
-            surfaceContainerLow = c.background, surfaceContainerLowest = c.card,
-            outline = c.separator, outlineVariant = c.separator, error = c.red,
-        )
-    }
+fun GymTheme(accent: Accent, content: @Composable () -> Unit) {
+    val c = AppColors(accent = accent.color)
+    val scheme = darkColorScheme(
+        primary = c.accent, onPrimary = c.onAccent, secondary = c.accent, onSecondary = c.onAccent,
+        background = c.background, onBackground = c.label,
+        surface = c.card, onSurface = c.label, surfaceVariant = c.cardElevated, onSurfaceVariant = c.secondaryLabel,
+        surfaceContainer = c.card, surfaceContainerHigh = c.cardElevated, surfaceContainerHighest = c.cardElevated,
+        surfaceContainerLow = c.card, surfaceContainerLowest = c.background,
+        outline = c.border, outlineVariant = c.separator, error = c.red,
+        primaryContainer = c.cardElevated, onPrimaryContainer = c.label,
+        secondaryContainer = c.chip, onSecondaryContainer = c.label,
+    )
     val t = AppType()
     val typography = Typography(
         displayLarge = t.bigNumber, headlineLarge = t.largeTitle, headlineMedium = t.title1, headlineSmall = t.title2,

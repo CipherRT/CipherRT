@@ -117,7 +117,7 @@ fun DayEditorScreen(dayId: Long, onBack: () -> Unit, onAddExercise: () -> Unit, 
             ActionSheet(
                 title = "Pin to a weekday",
                 actions = listOf(SheetAction("Any day (follow the order)") { save(weekday = null) }) +
-                    (1..7).map { w -> SheetAction(Weekdays.long(w) + if (d.weekday == w) "  ✓" else "") { save(weekday = w) } },
+                    (1..7).map { w -> SheetAction(Weekdays.long(w) + if (d.weekday == w) " (current)" else "") { save(weekday = w) } },
                 onDismiss = { pickWeekday = false },
             )
         }

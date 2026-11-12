@@ -8,15 +8,13 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.IntentCompat
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gymplanner.app.core.ui.DarkAppColors
+import com.gymplanner.app.core.ui.Accent
+import com.gymplanner.app.core.ui.AppColors
 import com.gymplanner.app.core.ui.GymTheme
-import com.gymplanner.app.core.ui.LightAppColors
-import com.gymplanner.app.core.data.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class MainActivity : ComponentActivity() {
@@ -28,24 +26,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val app = application as GymApp
         handleIntent(intent)
+        val bg = AppColors(accent = Accent.LIME.color).background.toArgb()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(bg),
+            navigationBarStyle = SystemBarStyle.dark(AppColors(accent = Accent.LIME.color).bottomBar.toArgb()),
+        )
+        window.setBackgroundDrawable(bg.toDrawable())
 
         setContent {
-            val themeMode by app.container.prefs.theme.collectAsStateWithLifecycle()
-            val dark = when (themeMode) {
-                ThemeMode.DARK -> true
-                ThemeMode.LIGHT -> false
-                ThemeMode.SYSTEM -> (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-                    android.content.res.Configuration.UI_MODE_NIGHT_YES
-            }
-            LaunchedEffect(dark) {
-                val bg = (if (dark) DarkAppColors else LightAppColors).background.toArgb()
-                enableEdgeToEdge(
-                    statusBarStyle = if (dark) SystemBarStyle.dark(bg) else SystemBarStyle.light(bg, bg),
-                    navigationBarStyle = if (dark) SystemBarStyle.dark(bg) else SystemBarStyle.light(bg, bg),
-                )
-                window.setBackgroundDrawable(bg.toDrawable())
-            }
-            GymTheme(themeMode) {
+            val accent by app.container.prefs.accent.collectAsStateWithLifecycle()
+            GymTheme(accent) {
                 AppRoot(pendingImport = pendingImport)
             }
         }
@@ -54,6 +44,12 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
+        val bg = AppColors(accent = Accent.LIME.color).background.toArgb()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(bg),
+            navigationBarStyle = SystemBarStyle.dark(AppColors(accent = Accent.LIME.color).bottomBar.toArgb()),
+        )
+        window.setBackgroundDrawable(bg.toDrawable())
     }
 
     private fun handleIntent(intent: Intent?) {

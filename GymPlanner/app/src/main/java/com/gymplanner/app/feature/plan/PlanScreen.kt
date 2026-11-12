@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Add
@@ -157,7 +157,7 @@ fun PlanScreen(menu: ProfileMenuTargets, onOpenDay: (Long) -> Unit, onOpenPlans:
 
 @Composable
 fun DayNumber(n: Int) {
-    Box(Modifier.size(32.dp).clip(CircleShape).background(AppTheme.colors.accent.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
-        Text("$n", style = AppTheme.type.subhead.copy(fontWeight = FontWeight.Bold), color = AppTheme.colors.accent)
+    Box(Modifier.size(32.dp).clip(RoundedCornerShape(10.dp)).background(AppTheme.colors.chip), contentAlignment = Alignment.Center) {
+        Text("$n", style = AppTheme.type.subhead.copy(fontWeight = FontWeight.Bold), color = AppTheme.colors.chipText)
     }
 }

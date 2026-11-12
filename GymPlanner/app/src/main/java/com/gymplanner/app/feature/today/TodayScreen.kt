@@ -211,7 +211,7 @@ fun TodayScreen(
             title = "Choose a day",
             actions = s.days.map { d ->
                 val pin = d.weekday?.let { " (${Weekdays.short(it)})" } ?: ""
-                SheetAction(d.name + pin + if (d.id == day?.id) "  ✓" else "") { vm.chooseDay(d.id) }
+                SheetAction(d.name + pin + if (d.id == day?.id) " (current)" else "") { vm.chooseDay(d.id) }
             },
             onDismiss = { choosingDay = false },
         )

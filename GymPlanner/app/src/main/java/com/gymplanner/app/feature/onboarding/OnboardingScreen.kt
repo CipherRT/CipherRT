@@ -230,10 +230,10 @@ private fun WelcomeStep() {
             Modifier
                 .size(96.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Brush.verticalGradient(listOf(Color(0xFF3A9BFF), Color(0xFF0060DF)))),
+                .background(AppTheme.colors.accent),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Rounded.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(56.dp))
+            Icon(Icons.Rounded.FitnessCenter, null, tint = AppTheme.colors.onAccent, modifier = Modifier.size(56.dp))
         }
         Spacer(Modifier.height(24.dp))
         Text("Welcome to\nGym Planner", style = AppTheme.type.largeTitle, color = AppTheme.colors.label, textAlign = TextAlign.Center)
@@ -248,7 +248,7 @@ private fun WelcomeStep() {
 @Composable
 private fun Feature(icon: ImageVector, color: Color, title: String, text: String) {
     Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(36.dp))
+        Icon(icon, null, tint = AppTheme.colors.chipText, modifier = Modifier.size(32.dp))
         Spacer(Modifier.width(18.dp))
         Column {
             Text(title, style = AppTheme.type.headline, color = AppTheme.colors.label)

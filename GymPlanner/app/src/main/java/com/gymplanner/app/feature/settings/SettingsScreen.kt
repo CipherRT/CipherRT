@@ -3,7 +3,19 @@ package com.gymplanner.app.feature.settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.gymplanner.app.core.ui.Accent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.CloudUpload
-import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.Height
 import androidx.compose.material.icons.rounded.PersonAdd
@@ -37,7 +48,6 @@ import androidx.lifecycle.viewModelScope
 import com.gymplanner.app.AppContainer
 import com.gymplanner.app.BuildConfigCompat
 import com.gymplanner.app.core.data.Profile
-import com.gymplanner.app.core.data.ThemeMode
 import com.gymplanner.app.core.model.Goal
 import com.gymplanner.app.core.model.UnitSystem
 import com.gymplanner.app.core.model.Units
@@ -85,7 +95,7 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
     val vm = appViewModel { SettingsViewModel(it) }
     val profile by vm.profile.collectAsStateWithLifecycle()
     val profiles by vm.profiles.collectAsStateWithLifecycle()
-    val theme by vm.c.prefs.theme.collectAsStateWithLifecycle()
+    val accent by vm.c.prefs.accent.collectAsStateWithLifecycle()
     val rest by vm.c.prefs.defaultRestSeconds.collectAsStateWithLifecycle()
     val context = LocalContext.current
     fun toast(msg: String) = Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
@@ -144,10 +154,12 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
                 }
             }
             item {
-                GroupedSection(header = "Appearance") {
-                    ListRow("Theme", icon = Icons.Rounded.DarkMode, iconColor = AppTheme.colors.purple, trailing = {
-                        SegmentedControl(ThemeMode.entries, theme, vm.c.prefs::setTheme, label = { it.label }, modifier = Modifier.width(200.dp))
-                    })
+                GroupedSection(header = "Accent colour", footer = "Used for buttons, finished sets, your streak and records.") {
+                    Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Accent.entries.forEach { a ->
+                            AccentSwatch(a, selected = a == accent) { vm.c.prefs.setAccent(a) }
+                        }
+                    }
                 }
             }
             item {
@@ -235,4 +247,20 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
             )
         }
     }
+}
+
+/** A round colour swatch; the chosen one gets a white ring. */
+@Composable
+private fun AccentSwatch(accent: Accent, selected: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .then(if (selected) Modifier.border(2.dp, AppTheme.colors.label, CircleShape) else Modifier)
+            .clickable(role = Role.RadioButton, onClickLabel = accent.label, onClick = onClick)
+            .padding(if (selected) 6.dp else 0.dp)
+            .clip(CircleShape)
+            .background(accent.color)
+            .semantics { contentDescription = accent.label + if (selected) ", selected" else "" },
+    )
 }

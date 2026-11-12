@@ -28,9 +28,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
 import androidx.compose.material.icons.rounded.FitnessCenter
-import androidx.compose.material.icons.rounded.MonitorWeight
+import androidx.compose.material.icons.rounded.MonitorHeart
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -77,7 +78,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 object Routes {
     const val TODAY = "today"
     const val PLAN = "plan"
-    const val WEIGHT = "weight"
+    const val TRACK = "track"
     const val PROGRESS = "progress"
     const val ONBOARDING = "onboarding"
     const val SETTINGS = "settings"
@@ -103,8 +104,8 @@ private data class Tab(val route: String, val label: String, val icon: ImageVect
 
 private val tabs = listOf(
     Tab(Routes.TODAY, "Today", Icons.Rounded.FitnessCenter),
-    Tab(Routes.PLAN, "Plan", Icons.Rounded.CalendarMonth),
-    Tab(Routes.WEIGHT, "Weight", Icons.Rounded.MonitorWeight),
+    Tab(Routes.PLAN, "Plan", Icons.AutoMirrored.Rounded.FormatListBulleted),
+    Tab(Routes.TRACK, "Track", Icons.Rounded.MonitorHeart),
     Tab(Routes.PROGRESS, "Progress", Icons.Rounded.BarChart),
 )
 
@@ -165,7 +166,7 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         menu = openProfileMenuTargets,
                         onOpenWorkout = { nav.navigate(Routes.workout(it)) },
                         onGoToPlan = { nav.goToTab(Routes.PLAN) },
-                        onGoToWeight = { nav.goToTab(Routes.WEIGHT) },
+                        onGoToWeight = { nav.goToTab(Routes.TRACK) },
                     )
                 }
                 tabComposable(Routes.PLAN) {
@@ -175,7 +176,7 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         onOpenPlans = { nav.navigate(Routes.PLANS) },
                     )
                 }
-                tabComposable(Routes.WEIGHT) { WeightScreen(menu = openProfileMenuTargets) }
+                tabComposable(Routes.TRACK) { WeightScreen(menu = openProfileMenuTargets) }
                 tabComposable(Routes.PROGRESS) {
                     ProgressScreen(menu = openProfileMenuTargets, onOpenExercise = { nav.navigate(Routes.exerciseHistory(it)) })
                 }
@@ -309,9 +310,9 @@ private fun NavHostController.goToTab(route: String, reset: Boolean = false) {
 /** iOS-style tab bar: hairline on top, icon above a small label, accent for the selected tab. */
 @Composable
 private fun TabBar(current: String?, onSelect: (String) -> Unit) {
-    Column(Modifier.fillMaxWidth().background(AppTheme.colors.card.copy(alpha = 0.97f))) {
-        HorizontalDivider(thickness = 0.5.dp, color = AppTheme.colors.separator)
-        Row(Modifier.fillMaxWidth().navigationBarsPadding().height(58.dp)) {
+    Column(Modifier.fillMaxWidth().background(AppTheme.colors.bottomBar)) {
+        HorizontalDivider(thickness = 1.dp, color = AppTheme.colors.separator)
+        Row(Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 8.dp).height(64.dp)) {
             tabs.forEach { tab ->
                 val selected = tab.route == current
                 val color = if (selected) AppTheme.colors.accent else AppTheme.colors.secondaryLabel
@@ -324,12 +325,12 @@ private fun TabBar(current: String?, onSelect: (String) -> Unit) {
                             indication = null,
                             role = Role.Tab,
                         ) { onSelect(tab.route) }
-                        .padding(top = 6.dp),
+                        .padding(top = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Icon(tab.icon, contentDescription = null, tint = color, modifier = Modifier.size(26.dp))
-                    Spacer(Modifier.height(2.dp))
-                    Text(tab.label, style = AppTheme.type.caption.copy(fontSize = 11.sp), color = color)
+                    Icon(tab.icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+                    Spacer(Modifier.height(4.dp))
+                    Text(tab.label, style = AppTheme.type.caption.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold), color = color)
                 }
             }
         }
