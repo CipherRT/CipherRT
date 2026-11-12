@@ -23,46 +23,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gymplanner.app.ProfileMenuTargets
 import com.gymplanner.app.core.data.BodyWeightEntry
 import com.gymplanner.app.core.model.UnitSystem
 import com.gymplanner.app.core.model.Units
 import com.gymplanner.app.core.ui.AppTheme
 import com.gymplanner.app.core.ui.Card
-import com.gymplanner.app.core.ui.CircleIconButton
 import com.gymplanner.app.core.ui.Dates
 import com.gymplanner.app.core.ui.EmptyState
 import com.gymplanner.app.core.ui.GroupedSection
-import com.gymplanner.app.core.ui.LargeTitle
 import com.gymplanner.app.core.ui.LineChart
 import com.gymplanner.app.core.ui.ListRow
 import com.gymplanner.app.core.ui.RowDivider
 import com.gymplanner.app.core.ui.SegmentedControl
 import com.gymplanner.app.core.ui.appViewModel
-import com.gymplanner.app.feature.settings.ProfileMenuButton
 
+/** Weight section of the Track tab: summary, chart and history. Owns the add/edit sheet. */
 @Composable
-fun WeightScreen(menu: ProfileMenuTargets) {
+fun WeightSection(listTop: @Composable () -> Unit) {
     val vm = appViewModel { WeightViewModel(it) }
     val s by vm.state.collectAsStateWithLifecycle()
     var adding by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<BodyWeightEntry?>(null) }
     val units = s.units
 
-    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item { listTop() }
         item {
-            LargeTitle("Weight") {
-                CircleIconButton(Icons.Rounded.Add, "Add weight", onClick = { adding = true })
-                ProfileMenuButton(menu)
-            }
+            com.gymplanner.app.core.ui.PrimaryButton(
+                "Add weight", onClick = { adding = true }, icon = Icons.Rounded.Add,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
         }
         if (s.entries.isEmpty()) {
-            item {
-                EmptyState(
-                    Icons.Rounded.MonitorWeight, "No weight yet", "Add your weight to start your chart.",
-                    actionText = "Add Weight", onAction = { adding = true },
-                )
-            }
+            item { EmptyState(Icons.Rounded.MonitorWeight, "No weight yet", "Add your weight to start your chart.") }
         } else {
             item { SummaryCard(s, units) }
             item {
@@ -79,11 +72,7 @@ fun WeightScreen(menu: ProfileMenuTargets) {
                             yLabel = { Units.formatNumber(it, 0) },
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(
-                            "Line: 7-day average · Dots: each entry",
-                            style = AppTheme.type.caption,
-                            color = AppTheme.colors.secondaryLabel,
-                        )
+                        Text("Line: 7-day average · Dots: each entry", style = AppTheme.type.caption, color = AppTheme.colors.secondaryLabel)
                     }
                 }
             }
@@ -103,8 +92,8 @@ fun WeightScreen(menu: ProfileMenuTargets) {
                     }
                 }
             }
-            item { Spacer(Modifier.height(24.dp)) }
         }
+        item { Spacer(Modifier.height(24.dp)) }
     }
 
     val p = s.profile
@@ -123,7 +112,7 @@ fun WeightScreen(menu: ProfileMenuTargets) {
 private fun SummaryCard(s: WeightUiState, units: UnitSystem) {
     val latest = s.latest ?: return
     Card {
-        Text("CURRENT", style = AppTheme.type.footnote.copy(fontWeight = FontWeight.SemiBold), color = AppTheme.colors.secondaryLabel)
+        Text("CURRENT", style = AppTheme.type.sectionHeader, color = AppTheme.colors.secondaryLabel)
         Row(verticalAlignment = Alignment.Bottom) {
             Text(Units.formatWeight(latest.weightKg, units, withUnit = false), style = AppTheme.type.bigNumber, color = AppTheme.colors.label)
             Text(" ${units.weightUnit}", style = AppTheme.type.title3, color = AppTheme.colors.secondaryLabel, modifier = Modifier.padding(bottom = 8.dp))

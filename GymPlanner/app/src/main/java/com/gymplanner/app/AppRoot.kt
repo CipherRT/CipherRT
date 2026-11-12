@@ -73,7 +73,8 @@ import com.gymplanner.app.feature.settings.SettingsScreen
 import com.gymplanner.app.feature.today.SummaryScreen
 import com.gymplanner.app.feature.today.TodayScreen
 import com.gymplanner.app.feature.today.WorkoutScreen
-import com.gymplanner.app.feature.weight.WeightScreen
+import com.gymplanner.app.feature.track.CardioEntryScreen
+import com.gymplanner.app.feature.track.TrackScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 
 object Routes {
@@ -92,6 +93,8 @@ object Routes {
     const val EXERCISE_HISTORY = "exercise/{exerciseId}"
     const val IMPORT = "import?uri={uri}"
     const val DEMO = "demo/{exerciseId}"
+    const val CARDIO = "cardio?id={id}"
+    fun cardio(id: Long? = null) = if (id == null) "cardio" else "cardio?id=$id"
     fun demo(id: Long) = "demo/$id"
 
     fun workout(id: Long) = "workout/$id"
@@ -169,7 +172,7 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         menu = openProfileMenuTargets,
                         onOpenWorkout = { nav.navigate(Routes.workout(it)) },
                         onGoToPlan = { nav.goToTab(Routes.PLAN) },
-                        onLogCardio = { nav.goToTab(Routes.TRACK) },
+                        onLogCardio = { nav.navigate(Routes.cardio()) },
                         onOpenProgress = { nav.goToTab(Routes.PROGRESS) },
                     )
                 }
@@ -180,7 +183,12 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         onOpenPlans = { nav.navigate(Routes.PLANS) },
                     )
                 }
-                tabComposable(Routes.TRACK) { WeightScreen(menu = openProfileMenuTargets) }
+                tabComposable(Routes.TRACK) {
+                    TrackScreen(menu = openProfileMenuTargets, onLogCardio = { nav.navigate(Routes.cardio(it)) })
+                }
+                composable(Routes.CARDIO, arguments = listOf(navArgument("id") { type = NavType.LongType; defaultValue = -1L })) { entry ->
+                    CardioEntryScreen(editId = entry.arguments?.getLong("id")?.takeIf { it > 0 }, onDone = { nav.popBackStack() })
+                }
                 tabComposable(Routes.PROGRESS) {
                     ProgressScreen(menu = openProfileMenuTargets, onOpenExercise = { nav.navigate(Routes.exerciseHistory(it)) })
                 }

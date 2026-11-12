@@ -8,6 +8,7 @@ class TrackRepository(db: AppDatabase) {
 
     fun cardio(profileId: Long): Flow<List<CardioSession>> = dao.observeCardio(profileId)
     fun cardioSince(profileId: Long, fromDay: Long): Flow<List<CardioSession>> = dao.observeCardioSince(profileId, fromDay)
+    suspend fun getCardio(id: Long) = dao.getCardio(id)
     suspend fun addCardio(c: CardioSession) = dao.insertCardio(c)
     suspend fun updateCardio(c: CardioSession) = dao.updateCardio(c)
     suspend fun deleteCardio(c: CardioSession) = dao.deleteCardio(c)

@@ -288,6 +288,9 @@ interface TrackDao {
     @Query("SELECT * FROM cardio_session WHERE profileId = :profileId ORDER BY date")
     suspend fun allCardio(profileId: Long): List<CardioSession>
 
+    @Query("SELECT * FROM cardio_session WHERE id = :id")
+    suspend fun getCardio(id: Long): CardioSession?
+
     @Insert suspend fun insertCardio(c: CardioSession): Long
     @Insert suspend fun insertCardio(list: List<CardioSession>)
     @Update suspend fun updateCardio(c: CardioSession)
