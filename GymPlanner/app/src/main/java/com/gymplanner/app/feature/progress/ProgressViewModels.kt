@@ -56,7 +56,7 @@ class ProgressViewModel(c: AppContainer) : ViewModel() {
 }
 
 data class SessionHistory(val sessionId: Long, val startedAt: Long, val sets: List<SetWithSession>) {
-    val bestWeight: Double get() = sets.maxOf { it.weightKg ?: 0.0 }
+    val bestWeight: Double get() = sets.filter { it.setType != com.gymplanner.app.core.data.SetType.WARMUP }.maxOfOrNull { it.weightKg ?: 0.0 } ?: 0.0
 }
 
 data class HistoryUiState(
@@ -87,8 +87,8 @@ class ExerciseHistoryViewModel(c: AppContainer, exerciseId: Long) : ViewModel() 
                 units = UnitSystem.from(p.unitSystem),
                 sessions = sessions,
                 chart = chart,
-                bestWeight = rows.maxOfOrNull { it.weightKg ?: 0.0 },
-                bestSet = rows.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 0) },
+                bestWeight = rows.filter { it.setType != com.gymplanner.app.core.data.SetType.WARMUP }.maxOfOrNull { it.weightKg ?: 0.0 },
+                bestSet = rows.filter { it.setType != com.gymplanner.app.core.data.SetType.WARMUP }.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 0) },
             )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HistoryUiState())

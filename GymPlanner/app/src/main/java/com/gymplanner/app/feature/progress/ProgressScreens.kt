@@ -133,7 +133,11 @@ fun ExerciseHistoryScreen(exerciseId: Long, onBack: () -> Unit) {
                     GroupedSection(header = Dates.relativeMillis(session.startedAt)) {
                         session.sets.forEachIndexed { i, set ->
                             ListRow(
-                                "Set ${set.setNumber}",
+                                when (set.setType) {
+                                    com.gymplanner.app.core.data.SetType.DROP -> "Drop set"
+                                    com.gymplanner.app.core.data.SetType.WARMUP -> "Warm-up ${set.setNumber}"
+                                    else -> "Set ${set.setNumber}"
+                                },
                                 value = "${Units.formatWeight(set.weightKg ?: 0.0, units)} × ${set.reps ?: 0}",
                             )
                             if (i < session.sets.lastIndex) RowDivider()

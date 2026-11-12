@@ -95,6 +95,8 @@ fun DayEditorScreen(dayId: Long, onBack: () -> Unit, onAddExercise: () -> Unit, 
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         if (item.pe.isWarmup) { Badge("Warm-up", AppTheme.colors.orange); Spacer(Modifier.width(6.dp)) }
                                         if (item.pe.isOptional) { Badge("Optional", AppTheme.colors.secondaryLabel); Spacer(Modifier.width(6.dp)) }
+                                        item.pe.supersetGroup?.let { g -> Badge("Superset ${'A' + g - 1}"); Spacer(Modifier.width(6.dp)) }
+                                        if (item.pe.dropSets > 0) { Badge("+${item.pe.dropSets} drop", AppTheme.colors.warning); Spacer(Modifier.width(6.dp)) }
                                         Box(handle.size(40.dp), contentAlignment = Alignment.Center) {
                                             Icon(Icons.Rounded.DragHandle, "Reorder", tint = AppTheme.colors.tertiaryLabel)
                                         }

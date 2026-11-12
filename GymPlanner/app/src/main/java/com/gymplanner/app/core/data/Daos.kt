@@ -159,6 +159,7 @@ data class SetWithSession(
     val setNumber: Int,
     val weightKg: Double?,
     val reps: Int?,
+    val setType: String = SetType.NORMAL,
 )
 
 data class ExerciseSummary(
@@ -193,10 +194,10 @@ interface WorkoutDao {
     @Update suspend fun updateSession(session: WorkoutSession)
     @Delete suspend fun deleteSession(session: WorkoutSession)
 
-    @Query("SELECT * FROM set_log WHERE sessionId = :sessionId ORDER BY exerciseOrder, setNumber")
+    @Query("SELECT * FROM set_log WHERE sessionId = :sessionId ORDER BY exerciseOrder, setNumber, parentSetId IS NOT NULL, id")
     fun observeSets(sessionId: Long): Flow<List<SetLog>>
 
-    @Query("SELECT * FROM set_log WHERE sessionId = :sessionId ORDER BY exerciseOrder, setNumber")
+    @Query("SELECT * FROM set_log WHERE sessionId = :sessionId ORDER BY exerciseOrder, setNumber, parentSetId IS NOT NULL, id")
     suspend fun sets(sessionId: Long): List<SetLog>
 
     @Query("SELECT * FROM set_log WHERE sessionId IN (:sessionIds)")
@@ -227,6 +228,7 @@ interface WorkoutDao {
         """
         SELECT MAX(sl.weightKg * sl.reps) FROM set_log sl JOIN workout_session s ON sl.sessionId = s.id
         WHERE s.profileId = :profileId AND sl.exerciseId = :exerciseId AND sl.completed = 1
+          AND sl.setType != 'warmup'
           AND s.finishedAt IS NOT NULL AND s.id != :excludeSessionId
         """
     )
@@ -235,11 +237,11 @@ interface WorkoutDao {
     @Query(
         """
         SELECT s.id AS sessionId, s.startedAt AS startedAt, sl.setNumber AS setNumber,
-               sl.weightKg AS weightKg, sl.reps AS reps
+               sl.weightKg AS weightKg, sl.reps AS reps, sl.setType AS setType
         FROM set_log sl JOIN workout_session s ON sl.sessionId = s.id
         WHERE s.profileId = :profileId AND sl.exerciseId = :exerciseId AND sl.completed = 1
           AND s.finishedAt IS NOT NULL
-        ORDER BY s.startedAt DESC, sl.setNumber
+        ORDER BY s.startedAt DESC, sl.setNumber, sl.id
         """
     )
     fun observeExerciseHistory(profileId: Long, exerciseId: Long): Flow<List<SetWithSession>>
@@ -261,6 +263,7 @@ interface WorkoutDao {
         """
         SELECT sl.* FROM set_log sl JOIN workout_session s ON sl.sessionId = s.id
         WHERE s.profileId = :profileId AND s.finishedAt IS NOT NULL AND sl.completed = 1
+          AND sl.setType != 'warmup'
           AND s.startedAt >= :fromMillis
         """
     )

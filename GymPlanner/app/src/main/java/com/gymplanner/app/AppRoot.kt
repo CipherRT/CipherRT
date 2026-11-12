@@ -215,6 +215,7 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         onFinished = { id ->
                             nav.navigate(Routes.summary(id)) { popUpTo(Routes.TODAY) }
                         },
+                        onHowTo = { nav.navigate(Routes.demo(it)) },
                     )
                 }
                 composable(

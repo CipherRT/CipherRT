@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.gymplanner.app.AppContainer
 import com.gymplanner.app.core.data.WorkoutSession
+import com.gymplanner.app.core.data.SetType
 import com.gymplanner.app.core.model.UnitSystem
 import com.gymplanner.app.core.model.Units
 import com.gymplanner.app.core.ui.AppTheme
@@ -67,7 +68,8 @@ class SummaryViewModel(private val c: AppContainer, private val sessionId: Long)
         viewModelScope.launch {
             val session = c.workouts.getSession(sessionId) ?: return@launch
             val units = UnitSystem.from(c.profiles.get(session.profileId)?.unitSystem)
-            val sets = c.workouts.getSets(sessionId).filter { it.completed }
+            // Warm-up sets don't count toward set totals or volume.
+            val sets = c.workouts.getSets(sessionId).filter { it.completed && it.setType != SetType.WARMUP }
             val names = c.exercises.getAll(sets.map { it.exerciseId }.distinct()).associate { it.id to it.name }
             val lines = sets.groupBy { it.exerciseOrder }.toSortedMap().values.map { list ->
                 val exId = list.first().exerciseId

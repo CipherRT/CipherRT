@@ -52,7 +52,28 @@ class WorkoutRepository(private val db: AppDatabase) {
             }
         }
         dao.insertSets(sets)
+        // Planned drop sets go under the last working set of each exercise.
+        val inserted = dao.sets(sessionId)
+        items.forEachIndexed { order, pe ->
+            if (pe.dropSets <= 0 || pe.isWarmup) return@forEachIndexed
+            val last = inserted.filter { it.exerciseOrder == order && it.parentSetId == null }.maxByOrNull { it.setNumber } ?: return@forEachIndexed
+            repeat(pe.dropSets.coerceAtMost(3)) {
+                dao.insertSet(dropFor(last))
+            }
+        }
         sessionId
+    }
+
+    private fun dropFor(parent: SetLog) = SetLog(
+        sessionId = parent.sessionId, exerciseId = parent.exerciseId, setNumber = parent.setNumber,
+        exerciseOrder = parent.exerciseOrder, planExerciseId = parent.planExerciseId,
+        setType = SetType.DROP, parentSetId = parent.id,
+    )
+
+    /** Adds a drop set under [parent] (or under the last drop already hanging off it). */
+    suspend fun addDropSet(parent: SetLog) {
+        val main = parent.parentSetId?.let { id -> dao.sets(parent.sessionId).firstOrNull { it.id == id } } ?: parent
+        dao.insertSet(dropFor(main))
     }
 
     suspend fun memory(profileId: Long, exerciseId: Long, currentSessionId: Long) = ExerciseMemory(
@@ -63,13 +84,22 @@ class WorkoutRepository(private val db: AppDatabase) {
     suspend fun updateSet(set: SetLog) = dao.updateSet(set)
 
     suspend fun addSet(after: SetLog) {
-        val existing = dao.sets(after.sessionId).filter { it.exerciseOrder == after.exerciseOrder }
+        val existing = dao.sets(after.sessionId).filter { it.exerciseOrder == after.exerciseOrder && it.parentSetId == null }
+        val template = existing.maxByOrNull { it.setNumber } ?: after
         dao.insertSet(
-            after.copy(id = 0, setNumber = (existing.maxOfOrNull { it.setNumber } ?: 0) + 1, completed = false)
+            template.copy(
+                id = 0, setNumber = (existing.maxOfOrNull { it.setNumber } ?: 0) + 1,
+                completed = false, weightKg = null, reps = null, parentSetId = null,
+                setType = if (template.setType == SetType.DROP) SetType.NORMAL else template.setType,
+            )
         )
     }
 
-    suspend fun removeSet(set: SetLog) = dao.deleteSet(set)
+    /** Removes a set and any drop sets under it. */
+    suspend fun removeSet(set: SetLog) = db.withTransaction {
+        dao.sets(set.sessionId).filter { it.parentSetId == set.id }.forEach { dao.deleteSet(it) }
+        dao.deleteSet(set)
+    }
 
     /** "Skip" an exercise for this session. */
     suspend fun skipExercise(sessionId: Long, exerciseOrder: Int) = db.withTransaction {

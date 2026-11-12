@@ -39,3 +39,26 @@ class UnitsTest {
         assertEquals(82.5, Units.parse("82,5")!!, 0.0)
     }
 }
+
+class PlateCalculatorTest {
+    private val calc = com.gymplanner.app.feature.today.PlateCalculator
+
+    @Test fun kg100() {
+        val r = calc.compute(100.0, 20.0, UnitSystem.METRIC)
+        assertEquals(listOf(25.0 to 1, 15.0 to 1), r.perSide)
+        assertEquals(100.0, r.achieved, 0.0)
+    }
+
+    @Test fun lb225() = assertEquals(listOf(45.0 to 2), calc.compute(225.0, 45.0, UnitSystem.IMPERIAL).perSide)
+
+    @Test fun leftoverWhenNotLoadable() {
+        val r = calc.compute(21.0, 20.0, UnitSystem.METRIC)
+        assertEquals(emptyList<Pair<Double, Int>>(), r.perSide)
+        assertEquals(1.0, r.leftover, 0.001)
+    }
+
+    @Test fun dropRounding() {
+        assertEquals(45.0, calc.roundToLoadable(55.0 * 0.8, UnitSystem.METRIC), 0.0)
+        assertEquals(40.0, calc.roundToLoadable(50.0 * 0.8, UnitSystem.METRIC), 0.0)
+    }
+}

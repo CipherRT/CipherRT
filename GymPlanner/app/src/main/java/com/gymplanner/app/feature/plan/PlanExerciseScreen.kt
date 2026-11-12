@@ -33,6 +33,8 @@ import com.gymplanner.app.core.ui.ListRow
 import com.gymplanner.app.core.ui.NavBar
 import com.gymplanner.app.core.ui.RowDivider
 import com.gymplanner.app.core.ui.Stepper
+import com.gymplanner.app.core.ui.SegmentedControl
+import androidx.compose.foundation.layout.width
 import com.gymplanner.app.core.ui.TextAction
 import com.gymplanner.app.core.ui.SwitchRow
 import com.gymplanner.app.core.ui.appViewModel
@@ -88,7 +90,23 @@ fun PlanExerciseScreen(id: Long, onBack: () -> Unit, onHowTo: (Long) -> Unit) {
                 }
             }
             item {
-                GroupedSection(header = "Rest", footer = "The rest timer starts by itself when you tick off a set.") {
+                GroupedSection(
+                    header = "Drop sets & supersets",
+                    footer = "Drop sets come after the last set, pre-filled 20% lighter. Exercises with the same superset letter alternate set by set; keep them next to each other in the day.",
+                ) {
+                    ListRow("Drop sets", trailing = { Stepper(e.dropSets, { v -> change { copy(dropSets = v) } }, 0..3) })
+                    RowDivider()
+                    ListRow("Superset", trailing = {
+                        SegmentedControl(
+                            listOf<Int?>(null, 1, 2, 3), e.supersetGroup, { v -> change { copy(supersetGroup = v) } },
+                            label = { it?.let { n -> ('A' + n - 1).toString() } ?: "None" },
+                            modifier = Modifier.width(200.dp),
+                        )
+                    })
+                }
+            }
+            item {
+                GroupedSection(header = "Rest", footer = "The rest timer starts by itself when you log a set (after the pair, in a superset).") {
                     ListRow(
                         "Rest between sets",
                         icon = Icons.Rounded.Timer, iconColor = AppTheme.colors.indigo,
