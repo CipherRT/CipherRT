@@ -9,10 +9,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import com.gymplanner.app.feature.widget.GymWidget
 import com.gymplanner.app.feature.weighin.WeighInScheduler
 
 private data class WeighInKey(val id: Long, val on: Boolean, val time: Int, val days: Int)
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class, kotlinx.coroutines.FlowPreview::class)
 class GymApp : Application() {
     lateinit var container: AppContainer
         private set
@@ -28,6 +34,13 @@ class GymApp : Application() {
             container.exercises.syncLibrary(container.prefs.libraryVersion) { container.prefs.libraryVersion = it }
             container.profiles.validateCurrent()
             _ready.value = true
+        }
+        // Keep the home-screen widget current: profile switch, finished workouts, plan changes.
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            container.profiles.currentProfile.flatMapLatest { p ->
+                if (p == null) flowOf(Unit)
+                else combine(container.workouts.finishedSessions(p.id), container.plans.activePlan(p.id), container.prefs.accent) { _, _, _ -> }
+            }.debounce(500).collect { runCatching { GymWidget.refresh(this@GymApp) } }
         }
         // Keep each profile's morning weigh-in alarm in step with its settings.
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {

@@ -110,6 +110,9 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    // Home-screen widget
+    implementation(libs.glance.appwidget)
+
     testImplementation(libs.junit)
     testImplementation(libs.room.testing)
     testImplementation(libs.robolectric)

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Gym Planner</string>
+    <string name="widget_description">Your streak, next workout and a quick + Weight button</string>
 </resources>
