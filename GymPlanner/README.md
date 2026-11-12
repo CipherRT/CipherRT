@@ -1,130 +1,103 @@
 # Gym Planner
 
-An offline Android app for planning your gym week, logging workouts and tracking your
-body weight. No account, no server, no internet: everything stays on the phone.
+An offline Android app for planning your gym week, logging workouts, cardio and body
+weight. No account, no server, no internet: everything stays on the phone.
 
-Nothing about any one person is built in. Every user starts with a short setup, so you
-can hand the same APK to a friend and it works for them from a clean start.
+Nothing about any one person is built in. A fresh install starts with a short setup
+and the **4-Day Split** template, so you can hand the same APK to a friend.
 
-## What it does
+## What's in version 2
 
 | Tab | What you get |
 | --- | --- |
-| **Today** | Today's day from your active plan, its exercises, estimated time, a *Light day* switch, **Start Workout**, and a quick **+ Weight** button |
-| **Plan** | Your active plan's days as cards (drag ≡ to reorder). Tap a day to edit exercises, sets, rep ranges, rest, notes, optional and warm-up flags |
-| **Weight** | Current weight, change since start and over the last 30 days, a small BMI number, a chart (7-day average line plus raw points, 1M / 3M / 1Y / All) and the full history |
-| **Progress** | This week's workouts, sets and volume, plus every exercise's best-set chart and past sessions |
+| **Today** | The next day in your rotation (no fixed weekdays), a sets ring, Start workout, today's weight and this week's cardio. On an off day: week dots, weight trend, Log cardio, and *Train anyway* |
+| **Plan** | Your plan's days (drag ≡ to reorder; *weekly* or *every 2 weeks*). Exercises with sets, rep range, to failure, per arm/leg, rest, warm-up, optional, drop sets and supersets |
+| **Track** | Weight chart (7-day average), cardio log (bike, elliptical, treadmill, stair climber, rower, walk, or your own) with weekly kcal, and body measurements |
+| **Progress** | Weekly streak, month calendar (gym, cardio, today), monthly stats, and a chart for every exercise |
 
-Your profile avatar (top right) switches profiles, adds a profile, and opens **Settings**
-(units, default rest, theme, backup/restore, delete profile).
+Also:
+* **Active workout:** one exercise per page (swipe). There's a set table with last time's numbers, big −/+ steppers, *Log set* with a haptic tick, drop sets pre-filled 20% lighter, and supersets that alternate set by set. A plate calculator appears for barbell lifts, and PR badges show when you beat your best. The rest timer keeps running and vibrates with the screen off.
+* **How to:** every exercise (153 built in) has a body map, steps, common mistakes and a *Watch demo video* button (a YouTube search). You can fill in the guide for your own exercises.
+* **Morning weigh-in:** a full-screen, alarm-style prompt at the time and days you choose. It doesn't show if you've already weighed in that day.
+* **Home-screen widget:** your streak, the next day, and a *+ Weight* button.
+* **Accent colour:** lime by default; orange, cyan or purple in Settings.
+* **Sharing:** *Share plan* sends a `.gymplan.json` (format 2) that holds no weights, logs or personal info. Format 1 files from v1 still import.
+* **Backup:** *Settings → Backup* saves one private file with a profile's settings, plans, weight, cardio, measurements and workouts. Restoring adds it as a new profile.
 
-### Logging a workout
-* Each set has a weight box, a reps box and a round tick button. Grey numbers are what
-  you did last time. Tick straight away to reuse them, or tap a box to type with a big number pad.
-* Ticking a set starts the rest timer. It keeps running with the screen off, shows a
-  countdown notification (+30 s / Skip), and vibrates when rest is over.
-* A small **PR** badge appears when weight × reps beats your best for that exercise.
-* The screen stays awake. If the app is closed mid-workout, **Resume Workout** is waiting on Today.
-* Optional exercises are greyed out with a **Skip** button. *Light day* leaves them out
-  and takes one set off everything else, for that session only.
+## Installing (updating from v1 keeps your data)
 
-### Sharing plans
-* **Plan → Share** (or *Plans → tap a plan → Share*) sends a small `.gymplan.json` file through
-  WhatsApp, Telegram, Drive and so on. The file holds the plan only: no weights, logs or personal info.
-* Opening that file on another phone (or *Plans → Import from File*) shows a preview, then
-  **Add to My Plans**. Exercises are matched by name; missing ones are created.
-* **Settings → Backup** is separate and private: one JSON file with a profile's plans,
-  weight and workouts, for moving to a new phone. Restoring adds it as a new profile.
+v2 uses the same app ID (`com.gymplanner.app`), a higher version code (2), and the
+**same signing key** as the v1 APK you installed, so it installs as an update. The
+database upgrade only adds tables and columns. It's tested on a real v1 database
+(`MigrationTest`).
 
-## Design
+**Before updating, it's still wise to back up:** in v1, open Settings → *Back Up* and save the file somewhere safe.
 
-The look is modelled on Apple's iOS apps:
+* **Send the APK to yourself** (Drive, Telegram "Saved Messages", email), open it on the phone and tap *Update*.
+* **Or by USB:** `adb install -r app-debug.apk` (`-r` keeps your data).
 
-* Inset grouped lists on a grey (light) or black (dark) background
-* Large bold titles, one blue accent colour, and system green, red and orange that always mean the same thing
-* Green switches, segmented controls, steppers, and "Cancel · Title · Done" sheets
-* Big tap targets (number keys are 58 dp, tick buttons 48 dp) for sweaty hands
-* Text sizes in `sp`, so they follow the phone's font-size setting
-* Dark theme by default; Light and System are in Settings
-
-## Install on your phone
-
-**Option A: send the file to yourself.** Put `app-debug.apk` (or `app-release.apk`) in
-Google Drive, Telegram "Saved Messages" or email. Open it on the phone and allow
-"Install unknown apps" for that app when Android asks.
-
-**Option B: USB cable.**
-1. On the phone: Settings → About phone → Software information → tap *Build number* 7 times.
-   Then Settings → Developer options → turn on *USB debugging*.
-2. Connect the phone and run:
-   ```bash
-   adb install -r app/build/outputs/apk/debug/app-debug.apk
-   ```
-
-**Option C: GitHub Actions (no Android setup needed).** Every push builds the APK.
-Go to the repository → **Actions** → the latest *Gym Planner APK* run → **Artifacts** →
-download `gym-planner-debug-apk` (a zip that contains the APK).
-
-> Every machine signs debug builds with its own key. If Android says "App not installed"
-> when updating, uninstall the old copy first. This deletes the app's data, so back up
-> first in Settings. Release builds signed with *your* key don't have this problem.
+> **Signing key:** the v1/v2 APKs are signed with the debug key from the build machine
+> (fingerprint `42:AC:17:C2:…:C3:F3`). A copy was sent to you as `v1-debug.keystore.backup`;
+> keep it safe. Every future update must be signed with it, or Android refuses to update
+> and you'd have to back up, uninstall and restore. To build with it on your own computer,
+> copy it to `~/.android/debug.keystore`. APKs from GitHub Actions use a different debug
+> key, so don't install those over this app unless you set up the signing secrets below.
 
 ## Build it yourself
 
-You need **JDK 17 or newer** and the **Android SDK** (platform 36, build-tools 36).
-The easiest way to get both is to install [Android Studio](https://developer.android.com/studio).
-Then:
+You need **JDK 17 or newer** and the **Android SDK** (platform 36). Android Studio installs both.
 
 ```bash
 cd GymPlanner
 echo "sdk.dir=$HOME/Android/Sdk" > local.properties   # macOS: $HOME/Library/Android/sdk
 ./gradlew assembleDebug          # → app/build/outputs/apk/debug/app-debug.apk
-./gradlew testDebugUnitTest      # unit tests
+./gradlew testDebugUnitTest      # unit + Robolectric tests (migration, backup, weigh-in, logic)
+./gradlew testDebugUnitTest -Pscreenshots   # also renders screens to app/build/screenshots
 ```
 
-### Release build (the one to give friends)
+Robolectric (test-only, not in the app) runs Android code on a computer. The tests use it
+to build a real v1 database and upgrade it, round-trip backups, check the weigh-in alarm,
+and draw screens for design checks.
+
+### Release build with your own key (for friends)
 
 ```bash
 ./scripts/make-release-key.sh    # creates ~/gymplanner-release.jks + keystore.properties
 ./gradlew assembleRelease        # → app/build/outputs/apk/release/app-release.apk
 ```
 
-**Keep `~/gymplanner-release.jks` and its password safe**, for example in a password manager
-plus a cloud backup. Every future update must be signed with the same key. If you lose it,
-friends have to uninstall (and lose their data) before installing a new version.
-`keystore.properties` and `*.jks` are git-ignored on purpose.
-
-To have GitHub build signed releases too, add four repository secrets
-(Settings → Secrets and variables → Actions): `KEYSTORE_BASE64` (output of
-`base64 -w0 ~/gymplanner-release.jks`), `KEYSTORE_PASSWORD`, `KEY_ALIAS` (`gymplanner`)
-and `KEY_PASSWORD`.
+A release key is a different key from the one on your phone. A release APK is a fresh
+install for anyone who has the debug build, so they'd back up, uninstall and restore once.
+GitHub Actions builds signed releases once the four secrets in
+`.github/workflows/gym-planner-apk.yml` are set.
 
 ## How the code is organised
 
-Kotlin, Jetpack Compose with Material 3, Room, Navigation Compose and kotlinx.serialization.
-MVVM: Room DAO → Repository → ViewModel → Compose screen. A single Gradle module, with one package per area:
+Kotlin, Jetpack Compose + Material 3, Room, Navigation Compose, kotlinx.serialization, Jetpack Glance (widget).
+MVVM: Room DAO → Repository → ViewModel → Compose screen.
 
 ```
 app/src/main/java/com/gymplanner/app/
-  core/data        Room database, entities, DAOs, migrations, repositories, prefs
-  core/model       units, enums, JSON file formats (formatVersion = 1)
-  core/ui          theme, number pad, chart, drag-to-reorder, shared components
+  core/data        Room database (v2), entities, DAOs, migrations, repositories, prefs
+  core/model       units, muscles, JSON file formats (plan + backup, formatVersion 2)
+  core/ui          theme (tokens, Space Grotesk + Inter), number pad, charts, body map, components
   feature/onboarding
-  feature/today    Today tab, active workout, rest timer service, summary
-  feature/plan     plan, day editor, exercise picker, exercise settings, import/share
-  feature/weight
-  feature/progress
+  feature/today    Today (rotation, off day), active workout, rest timer service, plate calculator
+  feature/plan     plan, day editor, exercise picker/settings, exercise demo, import/share
+  feature/track    cardio log, body measurements (weight lives in feature/weight)
+  feature/progress streak, calendar, exercise history
+  feature/weighin  alarm scheduling, full-screen weigh-in activity
+  feature/widget   home-screen widget
   feature/settings settings + profile menu
 app/src/main/assets/templates
-  exercises.json             76 built-in exercises grouped by muscle
-  5-day-split.gymplan.json   starter template (add more .gymplan.json files here, no code needed)
-app/schemas/       Room schema history, used to check migrations
+  exercises.json            153 exercises with guides (generated by scripts/library/build.py)
+  default.gymplan.json      4-Day Split template; add more .gymplan.json files for more templates
+app/schemas/       Room schema history (1.json, 2.json) used by MigrationTest
+licenses/          Open Font Licence for the bundled fonts
 ```
 
 ### Data rules
-* All weights are stored in kg and heights in cm. Units only change what you see.
-* Every table except the built-in exercise library carries a `profileId`, so profiles never see each other's data.
-* Only one plan per profile is active at a time.
-* Deleting a plan never deletes workout history: sessions store the day name, and sets point straight at the exercise.
-* The database starts at version 1, with no destructive fallback. When the schema changes,
-  bump `version` in `AppDatabase.kt` and add a `Migration` to `Migrations.ALL`.
+* Weights in kg, lengths in cm, energy in kcal; units only change what you see.
+* Every table except the exercise library and guides carries a `profileId`; profiles never see each other's data.
+* Deleting a plan never deletes history. Warm-up sets don't count toward set totals or volume. A drop set is its own row pointing at its main set.
+* Schema changes: bump `version` in `AppDatabase.kt`, add a `Migration` to `Migrations.ALL`, extend `MigrationTest`. Never use a destructive fallback.
