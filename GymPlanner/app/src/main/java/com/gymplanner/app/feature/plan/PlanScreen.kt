@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gymplanner.app.ProfileMenuTargets
 import com.gymplanner.app.core.model.MuscleGroups
-import com.gymplanner.app.core.model.Weekdays
+import com.gymplanner.app.core.data.DayFrequency
 import com.gymplanner.app.core.ui.AppTheme
 import com.gymplanner.app.core.ui.Badge
 import com.gymplanner.app.core.ui.CircleIconButton
@@ -113,7 +113,7 @@ fun PlanScreen(menu: ProfileMenuTargets, onOpenDay: (Long) -> Unit, onOpenPlans:
                                 leading = { DayNumber(index + 1) },
                                 trailing = {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        card.day.weekday?.let { Badge(Weekdays.short(it), AppTheme.colors.accent); Spacer(Modifier.width(8.dp)) }
+                                        if (card.day.frequency == DayFrequency.BIWEEKLY) { Badge("Every 2 wks"); Spacer(Modifier.width(8.dp)) }
                                         Box(handle.size(40.dp), contentAlignment = Alignment.Center) {
                                             Icon(Icons.Rounded.DragHandle, "Reorder", tint = AppTheme.colors.tertiaryLabel)
                                         }

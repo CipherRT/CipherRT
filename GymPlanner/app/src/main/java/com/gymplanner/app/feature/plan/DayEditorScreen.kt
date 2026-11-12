@@ -27,7 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gymplanner.app.core.data.summaryText
-import com.gymplanner.app.core.model.Weekdays
+import com.gymplanner.app.core.data.DayFrequency
+import com.gymplanner.app.core.ui.SegmentedControl
+import androidx.compose.foundation.layout.width
 import com.gymplanner.app.core.ui.ActionSheet
 import com.gymplanner.app.core.ui.AppTheme
 import com.gymplanner.app.core.ui.Badge
@@ -51,22 +53,28 @@ fun DayEditorScreen(dayId: Long, onBack: () -> Unit, onAddExercise: () -> Unit, 
     var name by remember { mutableStateOf<String?>(null) }
     var note by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(day?.id) { day?.let { if (name == null) { name = it.name; note = it.note } } }
-    var pickWeekday by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
         NavBar(day?.name?.ifBlank { "Day" } ?: "", onBack = onBack, backLabel = "Plan")
         val d = day ?: return@Column
         // Always save from the local field values so quick edits never overwrite each other.
-        fun save(weekday: Int? = d.weekday) = vm.update(
-            d.copy(name = name?.trim()?.ifBlank { null } ?: d.name, note = note ?: d.note, weekday = weekday)
+        fun save(frequency: String = d.frequency) = vm.update(
+            // Fixed weekdays are gone in v2: the rotation decides the day.
+            d.copy(name = name?.trim()?.ifBlank { null } ?: d.name, note = note ?: d.note, weekday = null, frequency = frequency)
         )
         LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             item {
-                GroupedSection(header = "Day") {
+                GroupedSection(header = "Day", footer = "Every 2 weeks: the day is skipped in the rotation if you did it in the last 14 days.") {
                     FieldRow(name ?: "", { name = it; save() }, placeholder = "Day name", label = "Name")
                     RowDivider()
-                    ListRow("Weekday", value = d.weekday?.let { Weekdays.long(it) } ?: "Any day", onClick = { pickWeekday = true })
+                    ListRow("How often", trailing = {
+                        SegmentedControl(
+                            listOf(DayFrequency.WEEKLY, DayFrequency.BIWEEKLY), d.frequency, { save(frequency = it) },
+                            label = { if (it == DayFrequency.WEEKLY) "Weekly" else "Every 2 wks" },
+                            modifier = Modifier.width(210.dp),
+                        )
+                    })
                     RowDivider()
                     FieldRow(note ?: "", { note = it; save() }, placeholder = "Note for the whole day (optional)", singleLine = false)
                 }
@@ -113,14 +121,6 @@ fun DayEditorScreen(dayId: Long, onBack: () -> Unit, onAddExercise: () -> Unit, 
             item { Spacer(Modifier.height(24.dp)) }
         }
 
-        if (pickWeekday) {
-            ActionSheet(
-                title = "Pin to a weekday",
-                actions = listOf(SheetAction("Any day (follow the order)") { save(weekday = null) }) +
-                    (1..7).map { w -> SheetAction(Weekdays.long(w) + if (d.weekday == w) " (current)" else "") { save(weekday = w) } },
-                onDismiss = { pickWeekday = false },
-            )
-        }
         if (confirmDelete) {
             ConfirmDialog(
                 title = "Delete “${d.name}”?",

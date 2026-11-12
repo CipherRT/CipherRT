@@ -12,6 +12,7 @@ import com.gymplanner.app.core.data.Prefs
 import com.gymplanner.app.core.data.ProfileRepository
 import com.gymplanner.app.core.data.WeightRepository
 import com.gymplanner.app.core.data.WorkoutRepository
+import com.gymplanner.app.core.data.TrackRepository
 
 /** Simple hand-written dependency container — one instance for the whole app. */
 class AppContainer(context: Context) {
@@ -25,5 +26,6 @@ class AppContainer(context: Context) {
     val exercises = ExerciseRepository(context, db)
     val plans = PlanRepository(context, db, exercises)
     val workouts = WorkoutRepository(db)
+    val track = TrackRepository(db)
     val backup = BackupRepository(db, plans, exercises, prefs)
 }

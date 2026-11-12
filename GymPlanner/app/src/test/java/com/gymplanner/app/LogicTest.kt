@@ -1,32 +1,69 @@
 package com.gymplanner.app
 
 import com.gymplanner.app.core.data.BodyWeightEntry
+import com.gymplanner.app.core.data.DayFrequency
 import com.gymplanner.app.core.data.PlanDay
+import com.gymplanner.app.feature.today.DoneWorkout
+import com.gymplanner.app.feature.today.StreakLogic
 import com.gymplanner.app.feature.today.TodayLogic
 import com.gymplanner.app.feature.weight.WeightLogic
 import com.gymplanner.app.feature.weight.WeightRange
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.time.LocalDate
 
 class TodayLogicTest {
-    private fun day(id: Long, order: Int, weekday: Int? = null) = PlanDay(id = id, planId = 1, name = "D$id", orderIndex = order, weekday = weekday)
-    private val days = listOf(day(1, 0), day(2, 1), day(3, 2))
+    private fun day(id: Long, order: Int, freq: String = DayFrequency.WEEKLY) =
+        PlanDay(id = id, planId = 1, name = "D$id", orderIndex = order, frequency = freq)
+    private val today = LocalDate.of(2026, 11, 12)
+    private fun done(id: Long?, daysAgo: Long, name: String = "D$id") =
+        DoneWorkout(id, name, today.minusDays(daysAgo), 1_000_000L - daysAgo * 1000)
 
-    @Test fun firstDayWhenNoHistory() = assertEquals(1L, TodayLogic.pickDay(days, 3, null)?.id)
-    @Test fun nextDayAfterLastWorkout() = assertEquals(2L, TodayLogic.pickDay(days, 3, 1)?.id)
-    @Test fun wrapsAround() = assertEquals(1L, TodayLogic.pickDay(days, 3, 3)?.id)
-    @Test fun noDays() = assertNull(TodayLogic.pickDay(emptyList(), 1, null))
+    // Back, Chest, Shoulders & Arms, Leg (every 2 weeks)
+    private val days = listOf(day(1, 0), day(2, 1), day(3, 2), day(4, 3, DayFrequency.BIWEEKLY))
 
-    @Test fun pinnedWeekdayWins() {
-        val pinned = listOf(day(1, 0), day(2, 1, weekday = 5), day(3, 2))
-        assertEquals(2L, TodayLogic.pickDay(pinned, 5, 2)?.id)
+    @Test fun firstDayWhenNoHistory() = assertEquals(1L, TodayLogic.nextDay(days, emptyList(), today)?.id)
+    @Test fun nextAfterLastWorkout() = assertEquals(2L, TodayLogic.nextDay(days, listOf(done(1, 2)), today)?.id)
+    @Test fun noDays() = assertNull(TodayLogic.nextDay(emptyList(), emptyList(), today))
+
+    /** Skipping days in real life doesn't skip days in the plan: a week off still resumes where you were. */
+    @Test fun skippedDaysDontPileUp() = assertEquals(3L, TodayLogic.nextDay(days, listOf(done(1, 20), done(2, 12)), today)?.id)
+
+    @Test fun biweeklyDaySkippedIfDoneWithin14Days() {
+        val history = listOf(done(4, 6), done(1, 4), done(2, 3), done(3, 1))
+        assertEquals(1L, TodayLogic.nextDay(days, history, today)?.id)
     }
 
-    @Test fun skipsDaysPinnedToOtherWeekdays() {
-        val pinned = listOf(day(1, 0), day(2, 1, weekday = 5), day(3, 2))
-        assertEquals(3L, TodayLogic.pickDay(pinned, 2, 1)?.id)
+    @Test fun biweeklyDayComesBackAfter14Days() {
+        val history = listOf(done(4, 15), done(1, 4), done(2, 3), done(3, 1))
+        assertEquals(4L, TodayLogic.nextDay(days, history, today)?.id)
     }
+
+    @Test fun restoredSessionsMatchByName() =
+        assertEquals(3L, TodayLogic.nextDay(days, listOf(done(null, 1, name = "D2")), today)?.id)
+}
+
+class StreakLogicTest {
+    private val today = LocalDate.of(2026, 11, 12) // a Thursday
+    private fun weekDays(weeksAgo: Long, count: Int) =
+        (0 until count).map { StreakLogic.weekStart(today).minusWeeks(weeksAgo).plusDays(it.toLong()) }
+
+    @Test fun unfinishedWeekDoesNotBreakStreak() {
+        val dates = weekDays(1, 4) + weekDays(2, 4) + weekDays(0, 1)
+        val s = StreakLogic.compute(dates, 4, today)
+        assertEquals(2, s.current); assertEquals(1, s.thisWeek)
+    }
+
+    @Test fun currentWeekCountsOnceHit() =
+        assertEquals(3, StreakLogic.compute(weekDays(0, 4) + weekDays(1, 4) + weekDays(2, 5), 4, today).current)
+
+    @Test fun missedWeekBreaksIt() {
+        val s = StreakLogic.compute(weekDays(1, 4) + weekDays(2, 2) + weekDays(3, 4) + weekDays(4, 4) + weekDays(5, 4), 4, today)
+        assertEquals(1, s.current); assertEquals(3, s.best)
+    }
+
+    @Test fun empty() = assertEquals(0, StreakLogic.compute(emptyList(), 4, today).current)
 }
 
 class WeightLogicTest {
@@ -41,7 +78,7 @@ class WeightLogicTest {
         val pts = WeightLogic.dailyPoints((0L..9L).map { e(it + 1, it, 80.0 + it) })
         val avg = WeightLogic.sevenDayAverage(pts)
         assertEquals(80.0, avg.first().y, 0.001)
-        assertEquals(86.0, avg.last().y, 0.001) // mean of 83..89
+        assertEquals(86.0, avg.last().y, 0.001)
     }
 
     @Test fun rangeFilter() {

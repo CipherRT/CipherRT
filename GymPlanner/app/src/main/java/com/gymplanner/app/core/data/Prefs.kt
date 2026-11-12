@@ -31,6 +31,15 @@ class Prefs(context: Context) {
         get() = sp.getInt(KEY_LIBRARY, 0)
         set(value) = sp.edit { putInt(KEY_LIBRARY, value) }
 
+    private val _notTodayDay = MutableStateFlow(sp.getLong(KEY_NOT_TODAY, -1L))
+    /** Epoch day on which "Not today" was tapped (that day shows as an off day). */
+    val notTodayDay: StateFlow<Long> = _notTodayDay.asStateFlow()
+
+    fun setNotToday(epochDay: Long) {
+        sp.edit { putLong(KEY_NOT_TODAY, epochDay) }
+        _notTodayDay.value = epochDay
+    }
+
     fun setAccent(accent: Accent) {
         sp.edit { putString(KEY_ACCENT, accent.name) }
         _accent.value = accent
@@ -45,6 +54,7 @@ class Prefs(context: Context) {
         const val KEY_PROFILE = "current_profile"
         const val KEY_ACCENT = "accent"
         const val KEY_LIBRARY = "library_version"
+        const val KEY_NOT_TODAY = "not_today"
         const val KEY_REST = "default_rest"
     }
 }

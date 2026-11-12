@@ -38,7 +38,7 @@ abstract class ScreenshotBase {
         activity.setContent {
             GymTheme(Accent.LIME) { Box(Modifier.fillMaxSize().background(AppTheme.colors.background)) { content() } }
         }
-        repeat(5) { shadowOf(Looper.getMainLooper()).idle(); Thread.sleep(50) }
+        repeat(40) { shadowOf(Looper.getMainLooper()).idle(); Thread.sleep(100) }
         val view: View = activity.window.decorView
         val bmp = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
         view.draw(Canvas(bmp))

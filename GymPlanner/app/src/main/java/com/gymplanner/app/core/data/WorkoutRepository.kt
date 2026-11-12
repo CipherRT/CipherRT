@@ -41,7 +41,14 @@ class WorkoutRepository(private val db: AppDatabase) {
         val sets = items.flatMapIndexed { order, pe ->
             val count = if (isLight && !pe.isWarmup) (pe.sets - 1).coerceAtLeast(1) else pe.sets
             (1..count).map { n ->
-                SetLog(sessionId = sessionId, exerciseId = pe.exerciseId, setNumber = n, exerciseOrder = order, planExerciseId = pe.id)
+                SetLog(
+                    sessionId = sessionId, exerciseId = pe.exerciseId, setNumber = n, exerciseOrder = order, planExerciseId = pe.id,
+                    setType = when {
+                        pe.isWarmup -> SetType.WARMUP
+                        pe.toFailure -> SetType.FAILURE
+                        else -> SetType.NORMAL
+                    },
+                )
             }
         }
         dao.insertSets(sets)

@@ -67,6 +67,7 @@ android {
             )
             // ./gradlew testDebugUnitTest -Pscreenshots renders screens to app/build/screenshots
             it.systemProperty("screenshots", providers.gradleProperty("screenshots").isPresent.toString())
+            if (providers.gradleProperty("screenshots").isPresent) it.forkEvery = 1
             it.systemProperty("screenshotDir", layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
         }
     }

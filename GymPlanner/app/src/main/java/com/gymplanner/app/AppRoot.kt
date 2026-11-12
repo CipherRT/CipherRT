@@ -169,7 +169,8 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                         menu = openProfileMenuTargets,
                         onOpenWorkout = { nav.navigate(Routes.workout(it)) },
                         onGoToPlan = { nav.goToTab(Routes.PLAN) },
-                        onGoToWeight = { nav.goToTab(Routes.TRACK) },
+                        onLogCardio = { nav.goToTab(Routes.TRACK) },
+                        onOpenProgress = { nav.goToTab(Routes.PROGRESS) },
                     )
                 }
                 tabComposable(Routes.PLAN) {
