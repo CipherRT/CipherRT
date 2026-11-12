@@ -45,6 +45,16 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_FS_ASKED, false)
         set(value) = sp.edit { putBoolean(KEY_FS_ASKED, value) }
 
+    /** When a backup was last saved (0 = never). */
+    var lastBackupAt: Long
+        get() = sp.getLong(KEY_LAST_BACKUP, 0L)
+        set(value) = sp.edit { putLong(KEY_LAST_BACKUP, value) }
+
+    /** The version whose "make a backup" reminder has been shown. */
+    var backupReminderVersion: Int
+        get() = sp.getInt(KEY_BACKUP_REMINDER, 0)
+        set(value) = sp.edit { putInt(KEY_BACKUP_REMINDER, value) }
+
     fun setAccent(accent: Accent) {
         sp.edit { putString(KEY_ACCENT, accent.name) }
         _accent.value = accent
@@ -61,6 +71,8 @@ class Prefs(context: Context) {
         const val KEY_LIBRARY = "library_version"
         const val KEY_NOT_TODAY = "not_today"
         const val KEY_FS_ASKED = "fullscreen_asked"
+        const val KEY_LAST_BACKUP = "last_backup"
+        const val KEY_BACKUP_REMINDER = "backup_reminder"
         const val KEY_REST = "default_rest"
     }
 }

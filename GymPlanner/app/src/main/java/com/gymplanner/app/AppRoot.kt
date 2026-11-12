@@ -156,6 +156,28 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
     val currentProfile by (LocalContext.current.applicationContext as GymApp).container.profiles.currentProfile.collectAsStateWithLifecycle(null)
     WeighInPermissionPrompt(currentProfile?.weighInEnabled == true)
 
+    // After an update, suggest a backup once (so there's one before the next update).
+    val prefs = (LocalContext.current.applicationContext as GymApp).container.prefs
+    val appContext = LocalContext.current.applicationContext
+    val versionCode = remember { BuildConfigCompat.versionCode(appContext) }
+    var remindBackup by remember { mutableStateOf(false) }
+    LaunchedEffect(currentProfile?.id) {
+        if (currentProfile != null && prefs.backupReminderVersion < versionCode && prefs.lastBackupAt == 0L) {
+            if (BuildConfigCompat.wasUpdated(appContext)) remindBackup = true
+            else prefs.backupReminderVersion = versionCode // fresh install: nothing to protect yet
+        }
+    }
+    if (remindBackup) {
+        com.gymplanner.app.core.ui.ConfirmDialog(
+            title = "Gym Planner 2.0 is installed",
+            message = "Your plans, weights and workouts came across. It’s a good moment to save a private backup, so you’re safe before any future update.",
+            confirmText = "Back up now",
+            destructive = false,
+            onDismiss = { prefs.backupReminderVersion = versionCode; remindBackup = false },
+            onConfirm = { prefs.backupReminderVersion = versionCode; remindBackup = false; nav.navigate(Routes.SETTINGS) },
+        )
+    }
+
     val openProfileMenuTargets = ProfileMenuTargets(
         onAddProfile = { nav.navigate(Routes.ONBOARDING) },
         onSettings = { nav.navigate(Routes.SETTINGS) },

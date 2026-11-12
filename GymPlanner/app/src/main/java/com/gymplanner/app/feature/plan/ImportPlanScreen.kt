@@ -68,13 +68,25 @@ fun ImportPlanScreen(uri: Uri?, onClose: () -> Unit, onImported: () -> Unit) {
                     }
                     s.plan.days.forEach { day ->
                         item {
-                            GroupedSection(header = day.name, footer = day.note.ifBlank { null }) {
+                            GroupedSection(
+                                header = day.name + if (day.frequency == "biweekly") " · every 2 weeks" else "",
+                                footer = day.note.ifBlank { null },
+                            ) {
                                 day.exercises.forEachIndexed { i, e ->
                                     val target = PlanExercise(
                                         planDayId = 0, exerciseId = 0, orderIndex = 0, sets = e.sets, repMin = e.repMin,
                                         repMax = e.repMax, toFailure = e.toFailure, restSeconds = e.restSeconds, perSide = e.perSide,
                                     ).targetText()
-                                    ListRow(e.name, subtitle = listOfNotNull(target, if (e.isOptional) "optional" else null, if (e.isWarmup) "warm-up" else null).joinToString(" · "))
+                                    ListRow(
+                                        e.name,
+                                        subtitle = listOfNotNull(
+                                            target,
+                                            if (e.isOptional) "optional" else null,
+                                            if (e.isWarmup) "warm-up" else null,
+                                            e.supersetGroup?.let { "superset ${'A' + it - 1}" },
+                                            if (e.dropSets > 0) "+${e.dropSets} drop" else null,
+                                        ).joinToString(" · "),
+                                    )
                                     if (i < day.exercises.lastIndex) RowDivider()
                                 }
                             }

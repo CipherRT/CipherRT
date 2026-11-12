@@ -112,6 +112,7 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
         if (uri != null) vm.backup(
             write = { text ->
                 context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(text) }
+                vm.c.prefs.lastBackupAt = System.currentTimeMillis()
                 toast("Backup saved.")
             },
             onError = ::toast,
@@ -194,7 +195,8 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
             item {
                 GroupedSection(
                     header = "Backup",
-                    footer = "A backup holds this profile’s plans, weight and workouts. Keep it private — it’s for moving to a new phone. Restoring adds it as a new profile.",
+                    footer = "Last backup: " + (vm.c.prefs.lastBackupAt.takeIf { it > 0 }?.let { Dates.relativeMillis(it) } ?: "never") +
+                        ". A backup holds this profile’s plans, weight, cardio, measurements, workouts and settings. Keep it private: it’s for moving to a new phone, or for safety before installing an update. Restoring adds it as a new profile.",
                 ) {
                     ListRow("Back Up ${p.name}", icon = Icons.Rounded.CloudUpload, iconColor = AppTheme.colors.accent, onClick = {
                         val safe = p.name.replace(Regex("[^A-Za-z0-9]"), "").ifBlank { "profile" }

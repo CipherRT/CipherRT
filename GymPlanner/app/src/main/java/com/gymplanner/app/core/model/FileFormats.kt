@@ -98,6 +98,34 @@ data class ProfileJson(
     val unitSystem: String,
     val goal: String,
     val createdAt: Long,
+    // v2 settings (defaults when reading a v1 backup)
+    val weeklyTarget: Int = 4,
+    val weighInTime: Int = 420,
+    val weighInDays: Int = 127,
+    val weighInEnabled: Boolean = true,
+    val cardioCountsTowardTarget: Boolean = false,
+    val barWeightKg: Double = 20.0,
+)
+
+@Serializable
+data class CardioJson(
+    val date: Long,
+    val machine: String,
+    val customName: String = "",
+    val minutes: Int,
+    val kcal: Int,
+    val distanceKm: Double? = null,
+    val avgHeartRate: Int? = null,
+    val note: String = "",
+)
+
+@Serializable
+data class MeasurementJson(
+    val date: Long,
+    val waistCm: Double? = null,
+    val armCm: Double? = null,
+    val chestCm: Double? = null,
+    val thighCm: Double? = null,
 )
 
 @Serializable
@@ -111,6 +139,9 @@ data class SetLogJson(
     val reps: Int? = null,
     val completed: Boolean = false,
     val order: Int = 0,
+    val setType: String = "normal",
+    /** For a drop set: index of its main set in this session's list. */
+    val parent: Int? = null,
 )
 
 @Serializable
@@ -136,4 +167,6 @@ data class BackupFile(
     val weights: List<WeightJson> = emptyList(),
     val plans: List<BackupPlanJson> = emptyList(),
     val sessions: List<SessionJson> = emptyList(),
+    val cardio: List<CardioJson> = emptyList(),
+    val measurements: List<MeasurementJson> = emptyList(),
 )
