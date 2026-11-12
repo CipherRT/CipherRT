@@ -20,7 +20,7 @@ class GymApp : Application() {
         super.onCreate()
         container = AppContainer(this)
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-            container.exercises.seedIfNeeded()
+            container.exercises.syncLibrary(container.prefs.libraryVersion) { container.prefs.libraryVersion = it }
             container.profiles.validateCurrent()
             _ready.value = true
         }

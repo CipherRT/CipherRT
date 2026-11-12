@@ -65,6 +65,9 @@ android {
                 "robolectric.dependency.repo.url",
                 providers.gradleProperty("robolectricRepo").getOrElse("https://repo1.maven.org/maven2"),
             )
+            // ./gradlew testDebugUnitTest -Pscreenshots renders screens to app/build/screenshots
+            it.systemProperty("screenshots", providers.gradleProperty("screenshots").isPresent.toString())
+            it.systemProperty("screenshotDir", layout.buildDirectory.dir("screenshots").get().asFile.absolutePath)
         }
     }
     sourceSets {

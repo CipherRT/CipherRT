@@ -119,6 +119,7 @@ class PlanRepository(
                 name = day.name,
                 note = day.note,
                 weekday = day.weekday,
+                frequency = day.frequency,
                 exercises = items.mapNotNull { pe ->
                     val ex = exMap[pe.exerciseId] ?: return@mapNotNull null
                     PlanExerciseJson(
@@ -126,11 +127,12 @@ class PlanRepository(
                         sets = pe.sets, repMin = pe.repMin, repMax = pe.repMax, toFailure = pe.toFailure,
                         perSide = pe.perSide, restSeconds = pe.restSeconds, note = pe.note,
                         isOptional = pe.isOptional, isWarmup = pe.isWarmup,
+                        supersetGroup = pe.supersetGroup, dropSets = pe.dropSets,
                     )
                 },
             )
         }
-        return PlanJson(name = name ?: plan.name, days = days)
+        return PlanJson(name = name ?: plan.name, description = plan.description, days = days)
     }
 
     suspend fun exportFile(planId: Long): PlanFile = PlanFile(plan = toJson(planId))
@@ -138,6 +140,7 @@ class PlanRepository(
     /** Adds a plan from JSON. Matching exercises are reused by name, others are created. */
     suspend fun importPlan(profileId: Long, plan: PlanJson, makeActive: Boolean): Long = db.withTransaction {
         val planId = createEmpty(profileId, plan.name.ifBlank { "Imported plan" }, makeActive)
+        dao.getPlan(planId)?.let { dao.updatePlan(it.copy(description = plan.description)) }
         val cache = mutableMapOf<String, Long>()
         plan.days.forEachIndexed { dayIndex, day ->
             val dayId = dao.insertDay(
@@ -147,6 +150,7 @@ class PlanRepository(
                     orderIndex = dayIndex,
                     weekday = day.weekday?.takeIf { it in 1..7 },
                     note = day.note,
+                    frequency = if (day.frequency == DayFrequency.BIWEEKLY) DayFrequency.BIWEEKLY else DayFrequency.WEEKLY,
                 )
             )
             day.exercises.forEachIndexed { i, e ->
@@ -160,6 +164,7 @@ class PlanRepository(
                         repMax = e.repMax.coerceAtLeast(e.repMin), toFailure = e.toFailure,
                         restSeconds = e.restSeconds.coerceIn(0, 900), note = e.note,
                         isOptional = e.isOptional, perSide = e.perSide, isWarmup = e.isWarmup,
+                        supersetGroup = e.supersetGroup, dropSets = e.dropSets.coerceIn(0, 3),
                     )
                 )
             }

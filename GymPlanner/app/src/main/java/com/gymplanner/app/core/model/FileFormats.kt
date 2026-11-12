@@ -9,7 +9,8 @@ import kotlinx.serialization.json.Json
  * future version of the app can still read files made by this one.
  * Exercises are referenced by name, so plans work on any phone.
  */
-const val CURRENT_FORMAT_VERSION = 1
+/** v2 adds day frequency, supersets, drop sets and plan descriptions. Files of version 1 still load. */
+const val CURRENT_FORMAT_VERSION = 2
 
 @OptIn(ExperimentalSerializationApi::class)
 val AppJson = Json {
@@ -21,15 +22,27 @@ val AppJson = Json {
 }
 
 @Serializable
+data class GuideJson(
+    val primaryMuscles: List<String> = emptyList(),
+    val secondaryMuscles: List<String> = emptyList(),
+    val steps: List<String> = emptyList(),
+    val mistakes: List<String> = emptyList(),
+    val videoQuery: String = "",
+)
+
+@Serializable
 data class ExerciseJson(
     val name: String,
     val muscleGroup: String = "other",
     val equipment: String = "",
+    val guide: GuideJson? = null,
 )
 
 @Serializable
 data class ExerciseLibraryFile(
     val formatVersion: Int = CURRENT_FORMAT_VERSION,
+    /** Bumped whenever the built-in library changes, so existing installs pick it up. */
+    val libraryVersion: Int = 1,
     val exercises: List<ExerciseJson>,
 )
 
@@ -47,6 +60,8 @@ data class PlanExerciseJson(
     val note: String = "",
     val isOptional: Boolean = false,
     val isWarmup: Boolean = false,
+    val supersetGroup: Int? = null,
+    val dropSets: Int = 0,
 )
 
 @Serializable
@@ -54,6 +69,8 @@ data class PlanDayJson(
     val name: String,
     val note: String = "",
     val weekday: Int? = null,
+    /** "weekly" or "biweekly". */
+    val frequency: String = "weekly",
     val exercises: List<PlanExerciseJson> = emptyList(),
 )
 

@@ -33,12 +33,13 @@ import com.gymplanner.app.core.ui.ListRow
 import com.gymplanner.app.core.ui.NavBar
 import com.gymplanner.app.core.ui.RowDivider
 import com.gymplanner.app.core.ui.Stepper
+import com.gymplanner.app.core.ui.TextAction
 import com.gymplanner.app.core.ui.SwitchRow
 import com.gymplanner.app.core.ui.appViewModel
 
 /** Sets, reps, rest, note and options for one exercise in a day. Changes save instantly. */
 @Composable
-fun PlanExerciseScreen(id: Long, onBack: () -> Unit) {
+fun PlanExerciseScreen(id: Long, onBack: () -> Unit, onHowTo: (Long) -> Unit) {
     val vm = appViewModel(key = "pe$id") { PlanExerciseViewModel(it, id) }
     val stored by vm.item.collectAsStateWithLifecycle()
     val exercise by vm.exercise.collectAsStateWithLifecycle()
@@ -53,7 +54,9 @@ fun PlanExerciseScreen(id: Long, onBack: () -> Unit) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        NavBar(exercise?.name ?: "", onBack = onBack, backLabel = "Day")
+        NavBar(exercise?.name ?: "", onBack = onBack, backLabel = "Day") {
+            exercise?.let { ex -> TextAction("How to", { onHowTo(ex.id) }) }
+        }
         val e = pe ?: return@Column
         LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
             item {

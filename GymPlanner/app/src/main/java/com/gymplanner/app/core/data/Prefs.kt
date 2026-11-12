@@ -26,6 +26,11 @@ class Prefs(context: Context) {
         _currentProfileId.value = id
     }
 
+    /** Which version of the built-in exercise library has been loaded into the database. */
+    var libraryVersion: Int
+        get() = sp.getInt(KEY_LIBRARY, 0)
+        set(value) = sp.edit { putInt(KEY_LIBRARY, value) }
+
     fun setAccent(accent: Accent) {
         sp.edit { putString(KEY_ACCENT, accent.name) }
         _accent.value = accent
@@ -39,6 +44,7 @@ class Prefs(context: Context) {
     private companion object {
         const val KEY_PROFILE = "current_profile"
         const val KEY_ACCENT = "accent"
+        const val KEY_LIBRARY = "library_version"
         const val KEY_REST = "default_rest"
     }
 }

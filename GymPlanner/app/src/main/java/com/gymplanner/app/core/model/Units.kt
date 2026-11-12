@@ -88,6 +88,18 @@ object Weekdays {
 }
 
 object MuscleGroups {
-    val all = listOf("back", "chest", "shoulders", "biceps", "triceps", "legs", "core")
+    val all = listOf("back", "chest", "shoulders", "biceps", "triceps", "forearms", "legs", "glutes", "calves", "core")
     fun label(group: String): String = group.replaceFirstChar { it.uppercase() }
+}
+
+/** Muscles the body map can highlight, with the names people use. */
+object Muscles {
+    val labels = linkedMapOf(
+        "chest" to "Chest", "front_delts" to "Front delts", "side_delts" to "Side delts", "rear_delts" to "Rear delts",
+        "traps" to "Traps", "lats" to "Lats", "upper_back" to "Upper back", "lower_back" to "Lower back",
+        "biceps" to "Biceps", "triceps" to "Triceps", "forearms" to "Forearms", "abs" to "Abs", "obliques" to "Obliques",
+        "hip_flexors" to "Hip flexors", "glutes" to "Glutes", "quads" to "Quads", "hamstrings" to "Hamstrings",
+        "adductors" to "Inner thighs", "abductors" to "Outer hips", "calves" to "Calves",
+    )
+    fun label(key: String): String = labels[key] ?: key.replace('_', ' ').replaceFirstChar { it.uppercase() }
 }

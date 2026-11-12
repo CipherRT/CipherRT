@@ -61,6 +61,7 @@ import androidx.navigation.navArgument
 import com.gymplanner.app.core.ui.AppTheme
 import com.gymplanner.app.feature.onboarding.OnboardingScreen
 import com.gymplanner.app.feature.plan.DayEditorScreen
+import com.gymplanner.app.feature.plan.ExerciseDemoScreen
 import com.gymplanner.app.feature.plan.ExercisePickerScreen
 import com.gymplanner.app.feature.plan.ImportPlanScreen
 import com.gymplanner.app.feature.plan.PlanExerciseScreen
@@ -90,6 +91,8 @@ object Routes {
     const val PLAN_EXERCISE = "planExercise/{id}"
     const val EXERCISE_HISTORY = "exercise/{exerciseId}"
     const val IMPORT = "import?uri={uri}"
+    const val DEMO = "demo/{exerciseId}"
+    fun demo(id: Long) = "demo/$id"
 
     fun workout(id: Long) = "workout/$id"
     fun summary(id: Long) = "summary/$id"
@@ -245,7 +248,14 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
                     )
                 }
                 composable(Routes.PLAN_EXERCISE, arguments = listOf(navArgument("id") { type = NavType.LongType })) { entry ->
-                    PlanExerciseScreen(id = entry.arguments!!.getLong("id"), onBack = { nav.popBackStack() })
+                    PlanExerciseScreen(
+                        id = entry.arguments!!.getLong("id"),
+                        onBack = { nav.popBackStack() },
+                        onHowTo = { nav.navigate(Routes.demo(it)) },
+                    )
+                }
+                composable(Routes.DEMO, arguments = listOf(navArgument("exerciseId") { type = NavType.LongType })) { entry ->
+                    ExerciseDemoScreen(exerciseId = entry.arguments!!.getLong("exerciseId"), onBack = { nav.popBackStack() })
                 }
                 composable(Routes.EXERCISE_HISTORY, arguments = listOf(navArgument("exerciseId") { type = NavType.LongType })) { entry ->
                     ExerciseHistoryScreen(exerciseId = entry.arguments!!.getLong("exerciseId"), onBack = { nav.popBackStack() })
