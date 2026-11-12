@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.CloudUpload
@@ -166,6 +167,7 @@ fun SettingsScreen(onBack: () -> Unit, onAddProfile: () -> Unit) {
                     })
                 }
             }
+            item { WeighInSettings(p) { vm.update(it) } }
             item {
                 GroupedSection(header = "Accent colour", footer = "Used for buttons, finished sets, your streak and records.") {
                     Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -276,4 +278,79 @@ private fun AccentSwatch(accent: Accent, selected: Boolean, onClick: () -> Unit)
             .background(accent.color)
             .semantics { contentDescription = accent.label + if (selected) ", selected" else "" },
     )
+}
+
+/** Morning weigh-in: on/off, time, days, and a way to try it. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun WeighInSettings(p: Profile, onChange: (Profile) -> Unit) {
+    val context = LocalContext.current
+    var pickTime by remember { mutableStateOf(false) }
+    val fullScreenOk = com.gymplanner.app.feature.weighin.WeighInPermission.canFullScreen(context)
+    GroupedSection(
+        header = "Morning weigh-in",
+        footer = "A full-screen prompt at this time, like an alarm. It doesn’t show if you’ve already logged today’s weight.",
+    ) {
+        com.gymplanner.app.core.ui.SwitchRow(
+            "Weigh-in prompt", p.weighInEnabled, { onChange(p.copy(weighInEnabled = it)) },
+            icon = Icons.Rounded.Alarm,
+        )
+        if (p.weighInEnabled) {
+            RowDivider(startIndent = 60.dp)
+            ListRow("Time", value = com.gymplanner.app.feature.weighin.WeighInTimes.label(p.weighInTime), onClick = { pickTime = true })
+            RowDivider()
+            Row(Modifier.padding(horizontal = 12.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                java.time.DayOfWeek.entries.forEachIndexed { i, d ->
+                    val on = p.weighInDays and (1 shl i) != 0
+                    Box(
+                        Modifier
+                            .weight(1f)
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(if (on) AppTheme.colors.accent else AppTheme.colors.chip)
+                            .clickable(role = Role.Checkbox) { onChange(p.copy(weighInDays = p.weighInDays xor (1 shl i))) }
+                            .semantics { contentDescription = d.getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.getDefault()) + if (on) ", on" else ", off" },
+                        contentAlignment = androidx.compose.ui.Alignment.Center,
+                    ) {
+                        androidx.compose.material3.Text(
+                            d.getDisplayName(java.time.format.TextStyle.NARROW, java.util.Locale.getDefault()),
+                            style = AppTheme.type.subhead.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                            color = if (on) AppTheme.colors.onAccent else AppTheme.colors.chipText,
+                        )
+                    }
+                }
+            }
+            if (!fullScreenOk) {
+                RowDivider()
+                ListRow(
+                    "Allow full-screen alerts", subtitle = "Needed to show over the lock screen",
+                    onClick = { com.gymplanner.app.feature.weighin.WeighInPermission.openFullScreenSettings(context) },
+                )
+            }
+            RowDivider()
+            ListRow("Try it now", titleColor = AppTheme.colors.accent, showChevron = false, onClick = {
+                context.startActivity(
+                    android.content.Intent(context, com.gymplanner.app.feature.weighin.WeighInActivity::class.java)
+                        .putExtra(com.gymplanner.app.feature.weighin.WeighInScheduler.EXTRA_PROFILE, p.id)
+                        .putExtra(com.gymplanner.app.feature.weighin.WeighInScheduler.EXTRA_PREVIEW, true)
+                )
+            })
+        }
+    }
+    if (pickTime) {
+        val state = androidx.compose.material3.rememberTimePickerState(p.weighInTime / 60, p.weighInTime % 60, is24Hour = android.text.format.DateFormat.is24HourFormat(context))
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pickTime = false },
+            containerColor = AppTheme.colors.cardElevated,
+            text = { androidx.compose.material3.TimePicker(state) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { onChange(p.copy(weighInTime = state.hour * 60 + state.minute)); pickTime = false }) {
+                    androidx.compose.material3.Text("Done", color = AppTheme.colors.accent)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { pickTime = false }) { androidx.compose.material3.Text("Cancel", color = AppTheme.colors.accent) }
+            },
+        )
+    }
 }

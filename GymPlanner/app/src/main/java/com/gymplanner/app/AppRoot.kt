@@ -75,6 +75,7 @@ import com.gymplanner.app.feature.today.TodayScreen
 import com.gymplanner.app.feature.today.WorkoutScreen
 import com.gymplanner.app.feature.track.CardioEntryScreen
 import com.gymplanner.app.feature.track.TrackScreen
+import com.gymplanner.app.feature.weighin.WeighInPermissionPrompt
 import kotlinx.coroutines.flow.MutableStateFlow
 
 object Routes {
@@ -151,6 +152,9 @@ private fun MainNav(pendingImport: MutableStateFlow<Uri?>) {
             nav.goToTab(Routes.TODAY, reset = true)
         }
     }
+
+    val currentProfile by (LocalContext.current.applicationContext as GymApp).container.profiles.currentProfile.collectAsStateWithLifecycle(null)
+    WeighInPermissionPrompt(currentProfile?.weighInEnabled == true)
 
     val openProfileMenuTargets = ProfileMenuTargets(
         onAddProfile = { nav.navigate(Routes.ONBOARDING) },

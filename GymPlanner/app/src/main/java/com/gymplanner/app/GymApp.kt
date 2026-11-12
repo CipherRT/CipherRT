@@ -7,6 +7,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
+import com.gymplanner.app.feature.weighin.WeighInScheduler
+
+private data class WeighInKey(val id: Long, val on: Boolean, val time: Int, val days: Int)
 
 class GymApp : Application() {
     lateinit var container: AppContainer
@@ -23,6 +28,18 @@ class GymApp : Application() {
             container.exercises.syncLibrary(container.prefs.libraryVersion) { container.prefs.libraryVersion = it }
             container.profiles.validateCurrent()
             _ready.value = true
+        }
+        // Keep each profile's morning weigh-in alarm in step with its settings.
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            var known = emptySet<Long>()
+            container.profiles.profiles
+                .map { list -> list.map { WeighInKey(it.id, it.weighInEnabled, it.weighInTime, it.weighInDays) } to list }
+                .distinctUntilChangedBy { it.first }
+                .collect { (_, list) ->
+                    (known - list.map { it.id }.toSet()).forEach { WeighInScheduler.cancel(this@GymApp, it) }
+                    list.forEach { WeighInScheduler.schedule(this@GymApp, it) }
+                    known = list.map { it.id }.toSet()
+                }
         }
     }
 }

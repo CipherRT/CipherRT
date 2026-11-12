@@ -40,6 +40,11 @@ class Prefs(context: Context) {
         _notTodayDay.value = epochDay
     }
 
+    /** The one-time "allow full-screen weigh-in" question has been asked (Android 14+). */
+    var fullScreenAsked: Boolean
+        get() = sp.getBoolean(KEY_FS_ASKED, false)
+        set(value) = sp.edit { putBoolean(KEY_FS_ASKED, value) }
+
     fun setAccent(accent: Accent) {
         sp.edit { putString(KEY_ACCENT, accent.name) }
         _accent.value = accent
@@ -55,6 +60,7 @@ class Prefs(context: Context) {
         const val KEY_ACCENT = "accent"
         const val KEY_LIBRARY = "library_version"
         const val KEY_NOT_TODAY = "not_today"
+        const val KEY_FS_ASKED = "fullscreen_asked"
         const val KEY_REST = "default_rest"
     }
 }

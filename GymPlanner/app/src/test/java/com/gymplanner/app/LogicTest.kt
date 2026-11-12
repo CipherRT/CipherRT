@@ -92,3 +92,21 @@ class WeightLogicTest {
         assertEquals(-2.0, WeightLogic.changeOver(pts, 30, 100)!!, 0.001)
     }
 }
+
+class WeighInTimesTest {
+    private val t = com.gymplanner.app.feature.weighin.WeighInTimes
+    private val thu7 = java.time.LocalDateTime.of(2026, 11, 12, 7, 0) // Thursday
+
+    @Test fun laterTodayIfNotPassed() =
+        assertEquals(java.time.LocalDateTime.of(2026, 11, 12, 7, 0), t.next(thu7.minusMinutes(1), 420, 127))
+
+    @Test fun tomorrowOnceTodayPassed() =
+        assertEquals(java.time.LocalDateTime.of(2026, 11, 13, 7, 0), t.next(thu7, 420, 127))
+
+    @Test fun onlyChosenDays() {
+        val monOnly = 1 // bit 0 = Monday
+        assertEquals(java.time.LocalDateTime.of(2026, 11, 16, 6, 30), t.next(thu7, 390, monOnly))
+    }
+
+    @Test fun noDays() = assertNull(t.next(thu7, 420, 0))
+}
